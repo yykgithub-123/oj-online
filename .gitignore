@@ -128,3 +128,18 @@ application-test.yml
 *.class
 *.jar
 *.war
+
+# ==================== Project Specific ====================
+# 开发流程文档（可选保留）
+# 开发流程/
+
+# SQL更新脚本（可选保留）
+# *.sql
+
+# ==================== Large Files ====================
+# 避免提交大文件
+*.docx
+*.doc
+*.pdf
+*.xlsx
+*.xls
