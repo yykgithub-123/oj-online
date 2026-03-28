@@ -89,6 +89,8 @@ public class JudgeServiceImpl implements JudgeService {
 
         List<JudgeCase> judgeCaseList = JSONUtil.toList(judgeCaseStr, JudgeCase.class);
         List<String> inputList = judgeCaseList.stream().map(JudgeCase::getInput).collect(Collectors.toList());
+        // 将字面字符串 \n 转换为真正的换行符
+        inputList = inputList.stream().map(input -> input.replace("\\n", "\n")).collect(Collectors.toList());
         ExecuteCodeRequest executeCodeRequest = ExecuteCodeRequest.builder()
                 .code(code)
                 .language(language)
