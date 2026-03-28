@@ -130,8 +130,17 @@ application-test.yml
 *.war
 
 # ==================== Project Specific ====================
-# 开发流程文档（可选保留）
-# 开发流程/
+# 开发流程文档
+开发流程/
+
+# 文档目录
+docs/
+
+# 脚本目录
+scripts/
+
+# 临时代码
+tmpcode/
 
 # SQL更新脚本（可选保留）
 # *.sql
