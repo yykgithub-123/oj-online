@@ -55,7 +55,7 @@ server:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # 注释掉以减少SQL日志
   global-config:
     db-config:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名

@@ -27,10 +27,6 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Resource;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Service
 @Slf4j
 public class JudgeServiceImpl implements JudgeService {
@@ -129,7 +125,7 @@ public class JudgeServiceImpl implements JudgeService {
              // 直接保存错误结果并返回
              questionSubmitUpdate = new QuestionSubmit();
              questionSubmitUpdate.setId(questionSubmitId);
-             questionSubmitUpdate.setStatus(QuestionSubmitStatusEnum.SUCCEED.getValue());
+             questionSubmitUpdate.setStatus(QuestionSubmitStatusEnum.FAILED.getValue());
              questionSubmitUpdate.setJudgeInfo(JSONUtil.toJsonStr(errorJudgeInfo));
              // 设置执行时间、内存使用量、代码长度
              questionSubmitUpdate.setExecutionTime(errorJudgeInfo.getTime() != null ? errorJudgeInfo.getTime().intValue() : 0);
@@ -178,7 +174,6 @@ public class JudgeServiceImpl implements JudgeService {
             }
         }
         
-        QuestionSubmit questionSubmitResult = questionSubmitService.getById(questionSubmitId);
-        return questionSubmitResult;
+        return questionSubmitService.getById(questionSubmitId);
     }
 }

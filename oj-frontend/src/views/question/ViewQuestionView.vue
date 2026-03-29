@@ -79,9 +79,9 @@
               <div class="solution-header">
                 <h3>官方题解</h3>
                 <div class="solution-stats">
-                  <span>总通过次数: {{ submitStats.totalPassed || 1768 }}</span>
-                  <span>总尝试次数: {{ submitStats.totalAttempts || 1852 }}</span>
-                  <span>通过率: {{ submitStats.passRate || '95.5%' }}</span>
+                  <span>总通过次数: {{ question?.acceptedNum || 0 }}</span>
+                  <span>总尝试次数: {{ question?.submitNum || 0 }}</span>
+                  <span>通过率: {{ passRate }}</span>
                 </div>
               </div>
               <div class="solution-text">
@@ -200,7 +200,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watchEffect, withDefaults, defineProps } from "vue";
+import { onMounted, ref, watchEffect, withDefaults, defineProps, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { IconHome, IconRefresh, IconSettings } from '@arco-design/web-vue/es/icon';
@@ -226,14 +226,15 @@ const router = useRouter();
 const route = useRoute();
 const store = useStore();
 
-// 添加缺失的响应式数据
-const submitStats = ref({
-  totalPassed: 1768,
-  totalAttempts: 1852,
-  passRate: '95.5%'
-});
-
 const userSubmitRecords = ref([]);
+
+// 通过率计算属性
+const passRate = computed(() => {
+  const submitNum = question.value?.submitNum || 0;
+  const acceptedNum = question.value?.acceptedNum || 0;
+  if (submitNum === 0) return '0%';
+  return Math.round((acceptedNum / submitNum) * 100) + '%';
+});
 
 // 控制台相关
 const showConsole = ref(false);

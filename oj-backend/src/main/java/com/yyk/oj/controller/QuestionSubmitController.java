@@ -107,4 +107,25 @@ public class QuestionSubmitController {
         return ResultUtils.success(dailyActivity);
     }
 
+
+    /**
+     * 删除提交记录（仅管理员可用）
+     *
+     * @param id 提交记录ID
+     * @param request
+     * @return 是否删除成功
+     */
+    @PostMapping("/delete")
+    public BaseResponse<Boolean> deleteQuestionSubmit(@RequestBody Long id, HttpServletRequest request) {
+        if (id == null || id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "提交记录ID无效");
+        }
+        // 仅管理员可删除
+        User loginUser = userService.getLoginUser(request);
+        if (!userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限删除提交记录");
+        }
+        boolean result = questionSubmitService.deleteQuestionSubmit(id);
+        return ResultUtils.success(result);
+    }
 }

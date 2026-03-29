@@ -96,4 +96,12 @@ public interface QuestionSubmitService extends IService<QuestionSubmit> {
      * @return 日期列表 (yyyy-MM-dd)
      */
     List<String> getUserDailyActivity(Long userId);
+
+    /**
+     * 删除提交记录（同步更新统计数据）
+     *
+     * @param id 提交记录ID
+     * @return 是否删除成功
+     */
+    boolean deleteQuestionSubmit(Long id);
 }

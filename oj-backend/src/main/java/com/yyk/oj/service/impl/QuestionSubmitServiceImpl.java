@@ -306,4 +306,45 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         BeanUtils.copyProperties(user, vo);
         return vo;
     }
+
+    @Override
+    public boolean deleteQuestionSubmit(Long id) {
+        if (id == null || id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "提交记录ID无效");
+        }
+        
+        // 1. 查询要删除的记录
+        QuestionSubmit questionSubmit = this.getById(id);
+        if (questionSubmit == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "提交记录不存在");
+        }
+        
+        Long questionId = questionSubmit.getQuestionId();
+        Integer status = questionSubmit.getStatus();
+        
+        // 2. 更新题目统计 - submitNum - 1
+        UpdateWrapper<Question> submitUpdate = new UpdateWrapper<>();
+        submitUpdate.eq("id", questionId);
+        submitUpdate.setSql("submitNum = GREATEST(0, submitNum - 1)");
+        boolean updateSubmit = questionService.update(submitUpdate);
+        if (!updateSubmit) {
+            log.error("更新submitNum失败, questionId: {}", questionId);
+        }
+        
+        // 3. 如果是通过的记录，acceptedNum - 1
+        if (status != null && status.equals(QuestionSubmitStatusEnum.SUCCEED.getValue())) {
+            UpdateWrapper<Question> acceptUpdate = new UpdateWrapper<>();
+            acceptUpdate.eq("id", questionId);
+            acceptUpdate.setSql("acceptedNum = GREATEST(0, acceptedNum - 1)");
+            boolean updateAccept = questionService.update(acceptUpdate);
+            if (!updateAccept) {
+                log.error("更新acceptedNum失败, questionId: {}", questionId);
+            }
+        }
+        
+        // 4. 执行删除
+        boolean result = this.removeById(id);
+        log.info("删除提交记录: id={}, questionId={}, status={}, result={}", id, questionId, status, result);
+        return result;
+    }
 }

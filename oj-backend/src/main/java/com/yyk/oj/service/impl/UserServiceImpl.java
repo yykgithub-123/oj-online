@@ -439,7 +439,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                                            "通过所有测试用例".equals(message);
 
                         if (!isAccepted) {
-                             log.info("提交ID: {}, 状态: {}, Message: {}", submit.getId(), submit.getStatus(), message);
+                             // log.info("提交ID: {}, 状态: {}, Message: {}", submit.getId(), submit.getStatus(), message);
                         }
                         return isAccepted;
                     } catch (Exception e) {
