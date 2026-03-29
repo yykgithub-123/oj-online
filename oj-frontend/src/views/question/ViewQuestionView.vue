@@ -85,7 +85,14 @@
                 </div>
               </div>
               <div class="solution-text">
-                <div v-html="getSolutionContent()"></div>
+                <div class="solution-code-wrapper" v-if="question?.answer">
+                  <div class="solution-code-header">
+                    <span class="solution-code-title">官方题解代码</span>
+                    <span class="solution-code-lang">{{ form.language }}</span>
+                  </div>
+                  <pre class="solution-code-body"><code>{{ question.answer }}</code></pre>
+                </div>
+                <p class="no-solution" v-else>暂无官方题解</p>
               </div>
             </div>
           </a-tab-pane>
@@ -460,98 +467,6 @@ watchEffect(() => {
 const changeCode = (value: string) => {
   form.value.code = value;
 };
-
-/**
- * 根据题目获取对应的题解内容
- */
-const getSolutionContent = () => {
-  if (!question.value) return '<p>暂无题解</p>';
-  
-  const questionId = question.value.id;
-  const questionTitle = question.value.title || '';
-  
-  // 根据题目ID或标题返回不同的题解内容
-  const solutions: Record<string, string> = {
-    '1': `
-      <p>这是一个计数问题，需要统计数字x在1到n中出现的次数。</p>
-      <p><strong>解题思路：</strong></p>
-      <ol>
-        <li>遍历从1到n的所有数字</li>
-        <li>对每个数字，检查其各个位数是否包含x</li>
-        <li>统计总的出现次数</li>
-      </ol>
-      <p><strong>时间复杂度：</strong>O(n * log n)</p>
-      <p><strong>空间复杂度：</strong>O(1)</p>
-    `,
-    '2': `
-      <p>这是一个字符串处理问题，需要找到无重复字符的最长子串。</p>
-      <p><strong>解题思路：</strong></p>
-      <ol>
-        <li>使用滑动窗口技术</li>
-        <li>维护一个哈希表记录字符出现位置</li>
-        <li>当遇到重复字符时，移动左指针</li>
-      </ol>
-      <p><strong>时间复杂度：</strong>O(n)</p>
-      <p><strong>空间复杂度：</strong>O(min(m,n))</p>
-    `,
-    '3': `
-      <p>这是一个回文字符串问题，需要找到最长的回文子串。</p>
-      <p><strong>解题思路：</strong></p>
-      <ol>
-        <li>中心扩展算法</li>
-        <li>对每个可能的中心点进行扩展</li>
-        <li>考虑奇数长度和偶数长度的回文串</li>
-      </ol>
-      <p><strong>时间复杂度：</strong>O(n²)</p>
-      <p><strong>空间复杂度：</strong>O(1)</p>
-    `
-  };
-  
-  // 如果有对应的题解，返回对应内容，否则返回通用题解
-  if (solutions[questionId?.toString() || '']) {
-    return solutions[questionId?.toString() || ''];
-  }
-  
-  // 根据题目标题关键词匹配题解
-  if (questionTitle.includes('两数之和')) {
-    return `
-      <p>这是一个经典的哈希表问题。</p>
-      <p><strong>解题思路：</strong></p>
-      <ol>
-        <li>使用哈希表存储已遍历的数字和索引</li>
-        <li>对于每个数字，检查target-num是否在哈希表中</li>
-        <li>如果存在，返回两个索引</li>
-      </ol>
-      <p><strong>时间复杂度：</strong>O(n)</p>
-      <p><strong>空间复杂度：</strong>O(n)</p>
-    `;
-  } else if (questionTitle.includes('排序')) {
-    return `
-      <p>这是一个排序算法问题。</p>
-      <p><strong>解题思路：</strong></p>
-      <ol>
-        <li>可以使用快速排序、归并排序等算法</li>
-        <li>根据数据规模选择合适的排序算法</li>
-        <li>注意边界条件的处理</li>
-      </ol>
-      <p><strong>时间复杂度：</strong>O(n log n)</p>
-      <p><strong>空间复杂度：</strong>O(log n)</p>
-    `;
-  }
-  
-  // 默认通用题解
-  return `
-    <p>这道题目考查的是基本的算法和数据结构知识。</p>
-    <p><strong>解题思路：</strong></p>
-    <ol>
-      <li>仔细分析题目要求</li>
-      <li>选择合适的算法和数据结构</li>
-      <li>注意边界条件和特殊情况</li>
-      <li>优化时间和空间复杂度</li>
-    </ol>
-    <p><strong>建议：</strong>多练习类似题目，掌握常见的算法模式。</p>
-  `;
-};
 </script>
 
 <style scoped>
@@ -732,11 +647,15 @@ const getSolutionContent = () => {
   color: #4e5969;
   line-height: 1.6;
 }
+.solution-code-wrapper {  border: 1px solid #e5e6eb;  border-radius: 8px;  margin: 16px 0;  background-color: #fafafa;  overflow: hidden;}.solution-code-header {  display: flex;  justify-content: space-between;  align-items: center;  padding: 12px 16px;  background-color: #f2f3f5;  border-bottom: 1px solid #e5e6eb;}.solution-code-title {  font-weight: 600;  color: #1d2129;  font-size: 14px;}.solution-code-lang {  background-color: #165dff;  color: #fff;  padding: 2px 8px;  border-radius: 4px;  font-size: 12px;}.solution-code-body {  margin: 0;  padding: 16px;  background-color: #fafafa;  overflow-x: auto;  max-height: 400px;}.solution-code-body code {  font-family: Monaco, Menlo, Consolas, monospace;  font-size: 13px;  color: #333;  line-height: 1.6;  white-space: pre;}
 
-.solution-text ol {
-  padding-left: 20px;
+
+.no-solution {
+  color: #86909c;
+  text-align: center;
+  padding: 40px 0;
+  font-size: 14px;
 }
-
 .records-content {
   padding: 16px 0;
 }
