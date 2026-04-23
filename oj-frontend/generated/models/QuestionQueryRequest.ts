@@ -7,6 +7,8 @@ export type QuestionQueryRequest = {
     answer?: string;
     content?: string;
     current?: number;
+    difficulty?: string;
+    hasOfficialSolution?: boolean;
     id?: number;
     pageSize?: number;
     sortField?: string;

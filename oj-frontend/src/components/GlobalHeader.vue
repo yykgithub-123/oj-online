@@ -18,21 +18,8 @@
         </nav>
       </div>
       
-      <!-- 右侧搜索和用户区域 -->
+      <!-- 右侧用户区域 -->
       <div class="header-right">
-        <div class="search-box">
-          <a-input 
-            placeholder="搜索题目/答案/用户" 
-            class="search-input"
-            v-model="searchKeyword"
-            @press-enter="handleSearch"
-          >
-            <template #suffix>
-              <a-icon type="search" @click="handleSearch" />
-            </template>
-          </a-input>
-        </div>
-        
         <div class="user-section">
           <!-- 未登录状态 -->
           <div v-if="!store.state.user.loginUser.id || store.state.user.loginUser.userName === '未登录'" class="auth-buttons">
@@ -85,9 +72,6 @@ import message from "@arco-design/web-vue/es/message";
 const router = useRouter();
 const store = useStore();
 
-// 搜索关键词
-const searchKeyword = ref("");
-
 // 默认选中的菜单项
 const selectedKeys = ref(["/questions"]);
 
@@ -106,30 +90,10 @@ const doMenuClick = (key: string) => {
     window.open('http://localhost:8820/program-master', '_blank');
     return;
   }
-  
+
   router.push({
     path: key,
   });
-};
-
-// 搜索处理
-const handleSearch = () => {
-  if (searchKeyword.value.trim()) {
-    console.log("搜索:", searchKeyword.value);
-    // 实现搜索逻辑
-    message.info(`正在搜索: ${searchKeyword.value}`);
-    
-    // 这里可以添加实际的搜索逻辑
-    // 例如跳转到搜索结果页面
-    router.push({
-      path: '/questions',
-      query: {
-        search: searchKeyword.value
-      }
-    });
-  } else {
-    message.warning("请输入搜索关键词");
-  }
 };
 
 // 退出登录
@@ -186,22 +150,25 @@ const goToMembership = () => {
 
 <style scoped>
 #globalHeader {
-  background: #fff;
-  border-bottom: 1px solid #e8e8e8;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header-container {
-  /* 移除最大宽度限制，让头部占满整个屏幕 */
   width: 100%;
   margin: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
-  padding: 0 24px;
-  /* 确保容器占满宽度 */
+  height: var(--header-height);
+  padding: 0 var(--space-8);
   min-width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
 }
 
 .header-left {
@@ -215,35 +182,43 @@ const goToMembership = () => {
 .logo-section {
   display: flex;
   align-items: center;
-  margin-right: 16px;
+  margin-right: var(--space-8);
   flex-shrink: 0;
-  min-width: 0;
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast);
+}
+
+.logo-section:hover {
+  background: var(--bg-subtle);
 }
 
 .logo-icon {
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #4a90e2, #357abd);
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
   color: white;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  font-size: 16px;
-  margin-right: 8px;
+  font-weight: 700;
+  font-size: var(--text-base);
+  margin-right: var(--space-2);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .logo-text {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
 }
 
 .nav-menu {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
   display: flex;
   align-items: center;
 }
@@ -253,88 +228,49 @@ const goToMembership = () => {
   background: transparent;
   display: flex;
   flex-wrap: nowrap;
-  overflow: hidden;
   width: 100%;
 }
 
 .nav-menu :deep(.arco-menu-item) {
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
   margin: 0 2px;
-  padding: 0 8px;
-  border-radius: 4px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
   white-space: nowrap;
-  min-width: auto;
-  flex-shrink: 0;
-  font-size: 14px;
+  font-size: var(--text-sm);
+  transition: all var(--duration-fast);
 }
 
 .nav-menu :deep(.arco-menu-item:hover) {
-  background: #f0f7ff;
-  color: #4a90e2;
+  background: var(--bg-subtle);
+  color: var(--color-primary-500);
 }
 
 .nav-menu :deep(.arco-menu-item-selected) {
-  background: #e6f4ff;
-  color: #4a90e2;
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+  font-weight: 600;
 }
 
-/* 亚克AI菜单项特殊样式 */
+/* 亚克AI菜单项 */
 .nav-menu :deep(.ai-menu-item) {
-  background: linear-gradient(135deg, #667eea, #764ba2) !important;
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-accent-500) 100%) !important;
   color: white !important;
-  border-radius: 6px !important;
-  position: relative;
+  border-radius: var(--radius-md) !important;
   font-weight: 600 !important;
-  margin: 0 4px !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  transition: all var(--duration-fast) !important;
 }
 
 .nav-menu :deep(.ai-menu-item:hover) {
-  background: linear-gradient(135deg, #5a6fd8, #6a42a0) !important;
-  color: white !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.nav-menu :deep(.ai-menu-item::after) {
-  content: '🤖';
-  margin-left: 4px;
-  font-size: 12px;
-}
-
-.nav-menu :deep(.arco-menu) {
-  flex-wrap: nowrap !important;
-  overflow: hidden !important;
-}
-
-.nav-menu :deep(.arco-menu-item) {
-  flex-shrink: 0 !important;
-  white-space: nowrap !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
-}
-
-.search-box {
-  width: 280px;
-}
-
-.search-input {
-  border-radius: 20px;
-  background: #f5f5f5;
-  border: 1px solid #e8e8e8;
-}
-
-.search-input :deep(.arco-input) {
-  background: transparent;
-}
-
-.search-input :deep(.arco-input-suffix) {
-  cursor: pointer;
-  color: #999;
 }
 
 .user-section {
@@ -345,134 +281,148 @@ const goToMembership = () => {
 .auth-buttons {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-3);
 }
 
 .login-btn {
-  color: #666;
+  color: var(--text-secondary);
   font-weight: 500;
+  transition: color var(--duration-fast);
+}
+
+.login-btn:hover {
+  color: var(--color-primary-500);
 }
 
 .register-btn {
-  background: #4a90e2;
-  border-color: #4a90e2;
-  border-radius: 20px;
-  padding: 0 20px;
+  background: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  transition: all var(--duration-fast);
+}
+
+.register-btn:hover {
+  background: var(--color-primary-600);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .vip-btn {
-  color: #ff6b35;
-  font-weight: 500;
+  color: var(--color-warning);
+  font-weight: 600;
+  background: var(--color-warning-bg);
+  border-radius: var(--radius-md);
+  padding: var(--space-1) var(--space-3);
+  transition: all var(--duration-fast);
 }
 
-.vip-btn :deep(.arco-icon) {
-  color: #ff6b35;
-  margin-right: 4px;
+.vip-btn:hover {
+  background: var(--color-warning);
+  color: white;
 }
 
 .user-avatar {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-  transition: background 0.2s;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast);
+  border: 1px solid transparent;
 }
 
 .user-avatar:hover {
-  background: #f5f5f5;
+  background: var(--bg-subtle);
+  border-color: var(--border-default);
+}
+
+.user-avatar :deep(.arco-avatar) {
+  border: 2px solid var(--color-primary-200);
 }
 
 .username {
-  color: #333;
-  font-weight: 500;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: var(--text-sm);
 }
 
 .user-menu {
-  min-width: 120px;
+  min-width: 140px;
+  padding: var(--space-2);
 }
 
 .menu-item {
-  padding: 8px 12px;
+  padding: var(--space-3) var(--space-4);
   margin: 0;
   cursor: pointer;
-  border-radius: 4px;
-  transition: background 0.2s;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast);
+  font-size: var(--text-sm);
+  font-weight: 500;
 }
 
 .menu-item:hover {
-  background: #f5f5f5;
+  background: var(--bg-subtle);
+  color: var(--color-primary-500);
 }
 
 .menu-item.logout {
-  color: #f53f3f;
+  color: var(--color-error);
+  border-top: 1px solid var(--border-default);
+  margin-top: var(--space-2);
+  padding-top: var(--space-3);
 }
 
 .menu-item.logout:hover {
-  background: #ffece8;
+  background: var(--color-error-bg);
+  color: var(--color-error);
 }
 
 /* 响应式设计 */
 @media (max-width: 1000px) {
   .header-container {
-    padding: 0 16px;
+    padding: 0 var(--space-5);
   }
-  
+
   .nav-menu :deep(.arco-menu-item) {
-    margin: 0 1px;
-    padding: 0 6px;
-    font-size: 13px;
+    padding: 0 var(--space-2);
+    font-size: var(--text-xs);
   }
-  
-  .search-box {
-    width: 180px;
-  }
-  
+
   .logo-text {
-    font-size: 16px;
+    font-size: var(--text-base);
   }
 }
 
 @media (max-width: 900px) {
   .header-container {
-    padding: 0 12px;
+    padding: 0 var(--space-4);
   }
-  
+
   .nav-menu :deep(.arco-menu-item) {
-    margin: 0;
-    padding: 0 4px;
-    font-size: 12px;
+    padding: 0 var(--space-1);
+    font-size: var(--text-xs);
   }
-  
-  .search-box {
-    width: 150px;
-  }
-  
+
   .logo-text {
-    font-size: 14px;
+    font-size: var(--text-sm);
   }
 }
 
 @media (max-width: 768px) {
-  .header-container {
-    padding: 0 12px;
-  }
-  
   .nav-menu {
     display: none;
   }
-  
-  .search-box {
-    width: 150px;
-  }
-  
+
   .logo-text {
     display: none;
   }

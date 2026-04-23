@@ -13,30 +13,27 @@
 
 <style scoped>
 #basicLayout {
-  background: #f5f7fa;
-  /* 确保布局占满整个屏幕宽度 */
+  background: var(--bg-page);
   width: 100%;
   min-width: 100%;
 }
 
 #basicLayout .header {
   padding: 0;
-  height: 64px;
-  line-height: 64px;
-  background: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  height: var(--header-height);
+  line-height: var(--header-height);
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-default);
   position: sticky;
   top: 0;
   z-index: 100;
-  /* 确保头部占满宽度 */
   width: 100%;
 }
 
 #basicLayout .content {
-  background: #f5f7fa;
+  background: var(--bg-page);
   padding: 0;
-  min-height: calc(100vh - 64px);
-  /* 确保内容区域占满宽度 */
+  min-height: calc(100vh - var(--header-height));
   width: 100%;
 }
 </style>

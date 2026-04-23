@@ -99,6 +99,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         String answer = questionQueryRequest.getAnswer();
         Long userId = questionQueryRequest.getUserId();
         String difficulty = questionQueryRequest.getDifficulty();
+        Boolean hasOfficialSolution = questionQueryRequest.getHasOfficialSolution();
         String sortField = questionQueryRequest.getSortField();
         String sortOrder = questionQueryRequest.getSortOrder();
 
@@ -107,6 +108,14 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         queryWrapper.like(StringUtils.isNotBlank(content), "content", content);
         queryWrapper.like(StringUtils.isNotBlank(answer), "answer", answer);
         queryWrapper.eq(StringUtils.isNotBlank(difficulty), "difficulty", difficulty);
+        // 官方题解筛选：有题解 = answer不为空，无题解 = answer为空
+        if (hasOfficialSolution != null) {
+            if (hasOfficialSolution) {
+                queryWrapper.isNotNull("answer").ne("answer", "");
+            } else {
+                queryWrapper.and(wrapper -> wrapper.isNull("answer").or().eq("answer", ""));
+            }
+        }
         if (CollectionUtils.isNotEmpty(tags)) {
             queryWrapper.and(wrapper -> {
                 for (int i = 0; i < tags.size(); i++) {

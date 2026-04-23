@@ -22,31 +22,56 @@
 <style scoped>
 #userLayout {
   text-align: center;
-  background: url("https://gw.alipayobjects.com/zos/rmsportal/FfdJeJRQWjEeGTpqgBKj.png")
-    0% 0% / 100% 100%;
+  background: var(--bg-page);
+  min-height: 100vh;
 }
 
 #userLayout .logo {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
 }
 
 #userLayout .header {
-  margin-top: 16px;
+  margin-top: var(--space-4);
+  background: transparent;
+  height: auto;
+  line-height: normal;
+}
+
+#userLayout .header :deep(.arco-space) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+#userLayout .header div {
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 #userLayout .content {
-  margin-bottom: 16px;
-  padding: 20px;
+  margin-bottom: var(--space-4);
+  padding: var(--space-5);
+  background: transparent;
 }
 
 #userLayout .footer {
-  padding: 16px;
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  padding: var(--space-4);
   text-align: center;
+  background: transparent;
+}
+
+#userLayout .footer a {
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  text-decoration: none;
+  transition: color var(--duration-fast);
+}
+
+#userLayout .footer a:hover {
+  color: var(--color-primary-500);
 }
 </style>
 <script></script>

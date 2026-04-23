@@ -8,6 +8,10 @@ import "@/plugins/axios";
 import "@/access";
 import "bytemd/dist/index.css";
 
+// 自定义样式
+import "@/assets/styles/variables.css";
+import "@/assets/styles/common.css";
+
 // 忽略 ResizeObserver 循环警告 - 多层防御
 const _ResizeObserver = window.ResizeObserver;
 window.ResizeObserver = class ResizeObserver extends _ResizeObserver {

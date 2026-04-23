@@ -59,89 +59,89 @@ const goBack = () => {
 <style scoped>
 #membershipView {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bg-page);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: var(--space-5);
 }
 
 .membership-container {
   max-width: 600px;
   width: 100%;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
+  border: 1px solid var(--border-default);
 }
 
 .membership-header {
-  background: linear-gradient(135deg, #4a90e2, #357abd);
+  background: var(--color-primary-500);
   color: white;
   text-align: center;
-  padding: 40px 20px;
+  padding: var(--space-10) var(--space-5);
 }
 
 .title {
-  font-size: 32px;
-  font-weight: 700;
-  margin: 0 0 12px 0;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-size: var(--text-2xl);
+  font-weight: 600;
+  margin: 0 0 var(--space-3) 0;
 }
 
 .subtitle {
-  font-size: 16px;
+  font-size: var(--text-base);
   margin: 0;
   opacity: 0.9;
 }
 
 .membership-content {
-  padding: 40px 30px;
+  padding: var(--space-10) var(--space-6);
 }
 
 .feature-card {
   display: flex;
   align-items: center;
-  gap: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 30px;
-  margin-bottom: 30px;
-  border: 2px dashed #e9ecef;
+  gap: var(--space-5);
+  background: var(--color-gray-50);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+  border: 2px dashed var(--border-default);
 }
 
 .card-icon {
-  font-size: 48px;
-  color: #ffd700;
+  font-size: var(--text-3xl);
+  color: var(--color-warning);
   flex-shrink: 0;
 }
 
 .card-content h3 {
-  font-size: 24px;
-  color: #333;
-  margin: 0 0 8px 0;
+  font-size: var(--text-xl);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-2) 0;
   font-weight: 600;
 }
 
 .card-content p {
-  font-size: 16px;
-  color: #666;
+  font-size: var(--text-base);
+  color: var(--text-secondary);
   margin: 0;
   line-height: 1.5;
 }
 
 .development-info {
-  margin-bottom: 40px;
+  margin-bottom: var(--space-10);
 }
 
 .info-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  color: #555;
-  font-size: 14px;
-  border-bottom: 1px solid #f0f0f0;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .info-item:last-child {
@@ -149,80 +149,80 @@ const goBack = () => {
 }
 
 .info-item .arco-icon {
-  color: #4a90e2;
-  font-size: 16px;
+  color: var(--color-primary-500);
+  font-size: var(--text-base);
 }
 
 .action-buttons {
   display: flex;
-  gap: 16px;
+  gap: var(--space-4);
   justify-content: center;
 }
 
 .subscribe-btn {
-  background: linear-gradient(135deg, #4a90e2, #357abd);
-  border: none;
-  border-radius: 8px;
-  padding: 0 32px;
-  height: 48px;
-  font-size: 16px;
+  background: var(--color-primary-500);
+  border-color: var(--color-primary-500);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-8);
+  height: 44px;
+  font-size: var(--text-base);
   font-weight: 500;
   cursor: not-allowed;
   opacity: 0.6;
 }
 
 .back-btn {
-  border: 2px solid #4a90e2;
-  color: #4a90e2;
-  border-radius: 8px;
-  padding: 0 32px;
-  height: 48px;
-  font-size: 16px;
+  border: 1px solid var(--color-primary-500);
+  color: var(--color-primary-500);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-8);
+  height: 44px;
+  font-size: var(--text-base);
   font-weight: 500;
-  background: white;
-  transition: all 0.3s;
+  background: var(--bg-card);
+  transition: all var(--duration-fast);
 }
 
 .back-btn:hover {
-  background: #4a90e2;
+  background: var(--color-primary-500);
   color: white;
 }
 
 @media (max-width: 768px) {
   #membershipView {
-    padding: 12px;
+    padding: var(--space-3);
   }
-  
+
   .membership-header {
-    padding: 30px 20px;
+    padding: var(--space-6) var(--space-5);
   }
-  
+
   .title {
-    font-size: 28px;
+    font-size: var(--text-xl);
   }
-  
+
   .subtitle {
-    font-size: 14px;
+    font-size: var(--text-sm);
   }
-  
+
   .membership-content {
-    padding: 30px 20px;
+    padding: var(--space-6) var(--space-5);
   }
-  
+
   .feature-card {
     flex-direction: column;
     text-align: center;
-    padding: 24px;
+    padding: var(--space-6);
   }
-  
+
   .card-content h3 {
-    font-size: 20px;
+    font-size: var(--text-lg);
   }
-  
+
   .action-buttons {
     flex-direction: column;
   }
-  
+
   .subscribe-btn,
   .back-btn {
     width: 100%;
