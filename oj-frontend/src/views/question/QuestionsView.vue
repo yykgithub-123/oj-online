@@ -127,7 +127,7 @@
               <div class="item-title">
                 <div class="title-main">{{ question.title }}</div>
                 <div class="title-tags">
-                  <span class="tag new">NEW</span>
+                  <span v-if="isNewQuestion(question.createTime)" class="tag new">NEW</span>
                   <span 
                     v-for="tag in parseTags(question.tags).slice(0, 3)" 
                     :key="tag"
@@ -297,7 +297,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watchEffect } from "vue";
+import { computed, onMounted, ref, watchEffect } from "vue";
 import {
   Question,
   QuestionControllerService,
@@ -540,7 +540,19 @@ const getDifficultyText = (difficulty: string) => {
 // 获取标签样式类
 const getTagClass = (tag: string) => {
   const tagClasses = ['algorithm', 'data-structure', 'math', 'string'];
-  return tagClasses[Math.floor(Math.random() * tagClasses.length)];
+  let hash = 0;
+  for (let i = 0; i < tag.length; i++) {
+    hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return tagClasses[Math.abs(hash) % tagClasses.length];
+};
+
+// 判断题目是否为新题（7天内创建）
+const isNewQuestion = (createTime: string) => {
+  if (!createTime) return false;
+  const created = new Date(createTime).getTime();
+  const now = Date.now();
+  return now - created < 7 * 24 * 60 * 60 * 1000;
 };
 
 const onPageChange = (page: number) => {
@@ -748,9 +760,9 @@ const clearAllFilters = () => {
 };
 
 // 判断是否有激活的筛选条件
-const hasActiveFilters = () => {
+const hasActiveFilters = computed(() => {
   return selectedTags.value.length > 0 || selectedDifficulty.value !== "" || hasOfficialSolution.value !== null || searchKeyword.value !== "";
-};
+});
 
 // 跳转到会员页面
 const goToMembership = () => {
@@ -1460,7 +1472,7 @@ const goToMembership = () => {
 }
 
 /* 响应式设计 */
-@media (max-width: 500px) {
+@media (max-width: 768px) {
   .main-container {
     flex-direction: column;
     padding: 0 var(--space-4);

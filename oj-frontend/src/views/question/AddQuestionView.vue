@@ -355,18 +355,18 @@ const loadData = async () => {
       form.value = res.data as any;
       if (!form.value.judgeCase) {
         form.value.judgeCase = [{ input: "", output: "" }];
-      } else {
-        form.value.judgeCase = JSON.parse(form.value.judgeCase as any);
+      } else if (typeof form.value.judgeCase === 'string') {
+        form.value.judgeCase = JSON.parse(form.value.judgeCase);
       }
       if (!form.value.judgeConfig) {
         form.value.judgeConfig = { memoryLimit: 256, stackLimit: 128, timeLimit: 2000 };
-      } else {
-        form.value.judgeConfig = JSON.parse(form.value.judgeConfig as any);
+      } else if (typeof form.value.judgeConfig === 'string') {
+        form.value.judgeConfig = JSON.parse(form.value.judgeConfig);
       }
       if (!form.value.tags) {
         form.value.tags = [];
-      } else {
-        form.value.tags = JSON.parse(form.value.tags as any);
+      } else if (typeof form.value.tags === 'string') {
+        form.value.tags = JSON.parse(form.value.tags);
       }
     } else {
       message.error("加载失败，" + res.message);
@@ -400,7 +400,7 @@ const doSubmit = async () => {
       const res = await QuestionControllerService.updateQuestionUsingPost(form.value);
       if (res.code === 0) {
         message.success("更新成功");
-        router.push('/question/manage');
+        router.push('/manage/question/');
       } else {
         message.error("更新失败，" + res.message);
       }
@@ -408,7 +408,7 @@ const doSubmit = async () => {
       const res = await QuestionControllerService.addQuestionUsingPost(form.value);
       if (res.code === 0) {
         message.success("创建成功");
-        router.push('/question/manage');
+        router.push('/manage/question/');
       } else {
         message.error("创建失败，" + res.message);
       }
@@ -447,7 +447,7 @@ const previewQuestion = () => {
 };
 
 const goBack = () => {
-  router.push('/question/manage');
+  router.push('/manage/question/');
 };
 
 const onContentChange = (value: string) => {

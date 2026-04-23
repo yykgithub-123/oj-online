@@ -36,33 +36,6 @@
               </div>
               
               <div class="question-constraints" v-if="question">
-                <h3>输入描述</h3>
-                <div class="constraint-text">
-                  输入共1行，包含2个整数n、x，之间用一个空格隔开。
-                </div>
-                
-                <h3>输出描述</h3>
-                <div class="constraint-text">
-                  输出共1行，包含一个整数，表示x出现的次数。
-                </div>
-                
-                <h3>输入输出样例</h3>
-                <div class="example-section">
-                  <div class="example-item">
-                    <div class="example-label">示例</div>
-                    <div class="example-content">
-                      <div class="input-section">
-                        <div class="section-title">输入</div>
-                        <div class="code-block">11 1</div>
-                      </div>
-                      <div class="output-section">
-                        <div class="section-title">输出</div>
-                        <div class="code-block">4</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
                 <h3>运行限制</h3>
                 <div class="limits">
                   <ul>

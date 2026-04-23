@@ -10,9 +10,9 @@
         <nav class="nav-menu">
           <a-menu mode="horizontal" :selected-keys="selectedKeys" @menu-item-click="doMenuClick">
             <a-menu-item key="/questions">浏览题目</a-menu-item>
-            <a-menu-item key="/question_submit">浏览题目提交</a-menu-item>
-            <a-menu-item key="/add/question">创建题目</a-menu-item>
-            <a-menu-item key="/manage/question">管理题目</a-menu-item>
+            <a-menu-item v-if="isAdmin" key="/question_submit">浏览题目提交</a-menu-item>
+            <a-menu-item v-if="isAdmin" key="/add/question">创建题目</a-menu-item>
+            <a-menu-item v-if="isAdmin" key="/manage/question">管理题目</a-menu-item>
             <a-menu-item key="ai-link" class="ai-menu-item">亚克AI</a-menu-item>
           </a-menu>
         </nav>
@@ -64,7 +64,7 @@
 
 <script setup lang="ts">
 import { useRoute, useRouter } from "vue-router";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import ACCESS_ENUM from "@/access/accessEnum";
 import message from "@arco-design/web-vue/es/message";
@@ -82,6 +82,10 @@ router.afterEach((to, from, failure) => {
 
 // 获取真实登录用户数据
 store.dispatch("user/getLoginUser");
+
+const isAdmin = computed(() => {
+  return store.state.user?.loginUser?.userRole === ACCESS_ENUM.ADMIN;
+});
 
 // 菜单点击处理
 const doMenuClick = (key: string) => {
@@ -160,15 +164,13 @@ const goToMembership = () => {
 
 .header-container {
   width: 100%;
-  margin: 0;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: var(--header-height);
   padding: 0 var(--space-8);
-  min-width: 100%;
-  max-width: var(--content-max-width);
-  margin: 0 auto;
 }
 
 .header-left {

@@ -22,11 +22,6 @@
   padding: 0;
   height: var(--header-height);
   line-height: var(--header-height);
-  background: var(--bg-card);
-  border-bottom: 1px solid var(--border-default);
-  position: sticky;
-  top: 0;
-  z-index: 100;
   width: 100%;
 }
 
