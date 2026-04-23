@@ -249,7 +249,7 @@
                   </span>
                 </div>
                 <div class="notification-item">
-                  <a-switch v-model="preferences.notifications.solution" @change="updateNotifications" />
+                  <a-switch v-model="preferences.notifications.yyk" @change="updateNotifications" />
                   <span class="notification-label">
                     <icon-book />
                     题解更新

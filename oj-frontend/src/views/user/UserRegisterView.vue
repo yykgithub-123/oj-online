@@ -1,127 +1,154 @@
 <template>
   <div class="register-page">
-    <!-- 简洁背景 -->
-    <div class="bg-pattern"></div>
-
-    <!-- 主内容区 -->
-    <div class="register-wrapper">
-      <!-- 左侧品牌区 -->
-      <div class="brand-panel">
-        <div class="brand-header">
+    <!-- 左侧视觉区 -->
+    <div class="visual-panel">
+      <div class="visual-bg"></div>
+      <div class="visual-content">
+        <div class="brand-section">
           <div class="logo-box">
             <img src="@/assets/yake-logo.svg" alt="亚克OJ" class="logo" />
           </div>
-          <div class="brand-text">
-            <h1 class="brand-name">亚克OJ</h1>
-            <p class="brand-desc">在线判题系统</p>
-          </div>
+          <h1 class="brand-name">亚克OJ</h1>
+          <p class="brand-slogan">加入我们，开启算法之旅</p>
         </div>
 
-        <!-- 代码展示 -->
         <div class="code-box">
           <div class="code-header">
-            <span class="file-name">solution.py</span>
+            <div class="code-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <span class="file-name">Yyk.java</span>
           </div>
           <div class="code-content">
-            <pre><code><span class="keyword">def</span> <span class="method">solve</span>(n):
-    <span class="comment"># Your solution here</span>
-    <span class="keyword">return</span> n * <span class="number">2</span>
-
-<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
-    <span class="builtin">print</span>(<span class="method">solve</span>(<span class="number">21</span>))</code></pre>
+            <pre><code><span class="keyword">public class</span> <span class="class-name">Yyk</span> {
+  <span class="keyword">public int</span> <span class="method">maxSubArray</span>(<span class="keyword">int</span>[] nums) {
+    <span class="keyword">int</span> max = nums[<span class="number">0</span>], cur = <span class="number">0</span>;
+    <span class="keyword">for</span> (<span class="keyword">int</span> num : nums) {
+      cur = Math.<span class="method">max</span>(cur + num, num);
+      max = Math.<span class="method">max</span>(max, cur);
+    }
+    <span class="keyword">return</span> max;
+  }
+}</code></pre>
+          </div>
+          <div class="code-footer">
+            <span class="code-author">@Arkyyk</span>
           </div>
         </div>
 
-        <!-- 特性列表 -->
-        <div class="features-list">
-          <div class="feature-item">
-            <div class="feature-icon">
-              <icon-code />
+        <div class="features-grid">
+          <div class="feature-card">
+            <icon-code class="feature-icon" />
+            <div class="feature-info">
+              <span class="feature-title">Java语言支持</span>
+              <span class="feature-desc">Java</span>
             </div>
-            <span class="feature-text">海量算法题目</span>
           </div>
-          <div class="feature-item">
-            <div class="feature-icon">
-              <icon-bulb />
+          <div class="feature-card">
+            <icon-thunderbolt class="feature-icon" />
+            <div class="feature-info">
+              <span class="feature-title">实时判题</span>
+              <span class="feature-desc">毫秒级编译执行反馈</span>
             </div>
-            <span class="feature-text">实时判题反馈</span>
           </div>
-          <div class="feature-item">
-            <div class="feature-icon">
-              <icon-line-chart />
+          <div class="feature-card">
+            <icon-safe class="feature-icon" />
+            <div class="feature-info">
+              <span class="feature-title">安全沙箱</span>
+              <span class="feature-desc">Docker 隔离运行环境</span>
             </div>
-            <span class="feature-text">成长数据追踪</span>
           </div>
+        </div>
+
+        <div class="visual-footer">
+          <a href="http://www.isyyk.top" target="_blank">知识分享 by 程序员亚克</a>
         </div>
       </div>
+    </div>
 
-      <!-- 右侧注册表单 -->
-      <div class="form-panel">
-        <div class="form-card">
-          <div class="form-header">
-            <h2 class="form-title">注册</h2>
-            <p class="form-subtitle">创建账号开始刷题</p>
+    <!-- 右侧表单区 -->
+    <div class="form-panel">
+      <div class="form-inner">
+        <div class="form-header">
+          <h2 class="form-title">创建账号</h2>
+          <p class="form-subtitle">注册亚克OJ，开始你的编程之旅</p>
+        </div>
+
+        <a-form
+          class="register-form"
+          layout="vertical"
+          :model="form"
+          @submit="handleSubmit"
+        >
+          <a-form-item field="userAccount" hide-label>
+            <a-input
+              v-model="form.userAccount"
+              placeholder="请输入账号"
+              size="large"
+            >
+              <template #prefix>
+                <icon-user />
+              </template>
+            </a-input>
+          </a-form-item>
+
+          <a-form-item field="userPassword" hide-label>
+            <a-input-password
+              v-model="form.userPassword"
+              placeholder="请输入密码（至少8位）"
+              size="large"
+            >
+              <template #prefix>
+                <icon-lock />
+              </template>
+            </a-input-password>
+          </a-form-item>
+
+          <a-form-item field="checkPassword" hide-label>
+            <a-input-password
+              v-model="form.checkPassword"
+              placeholder="请再次确认密码"
+              size="large"
+            >
+              <template #prefix>
+                <icon-safe />
+              </template>
+            </a-input-password>
+          </a-form-item>
+
+          <a-form-item hide-label>
+            <a-button
+              type="primary"
+              html-type="submit"
+              long
+              size="large"
+              class="submit-btn"
+            >
+              注册
+            </a-button>
+          </a-form-item>
+
+          <div class="form-footer">
+            <span class="footer-text">已有账号？</span>
+            <a-link @click="goLogin" class="footer-link">立即登录</a-link>
           </div>
+        </a-form>
 
-          <a-form
-            class="register-form"
-            layout="vertical"
-            :model="form"
-            @submit="handleSubmit"
-          >
-            <a-form-item field="userAccount" hide-label>
-              <a-input
-                v-model="form.userAccount"
-                placeholder="账号"
-                size="large"
-              >
-                <template #prefix>
-                  <icon-user />
-                </template>
-              </a-input>
-            </a-form-item>
-
-            <a-form-item field="userPassword" hide-label>
-              <a-input-password
-                v-model="form.userPassword"
-                placeholder="密码（至少8位）"
-                size="large"
-              >
-                <template #prefix>
-                  <icon-lock />
-                </template>
-              </a-input-password>
-            </a-form-item>
-
-            <a-form-item field="checkPassword" hide-label>
-              <a-input-password
-                v-model="form.checkPassword"
-                placeholder="确认密码"
-                size="large"
-              >
-                <template #prefix>
-                  <icon-safe />
-                </template>
-              </a-input-password>
-            </a-form-item>
-
-            <a-form-item hide-label>
-              <a-button
-                type="primary"
-                html-type="submit"
-                long
-                size="large"
-                class="submit-btn"
-              >
-                注册
-              </a-button>
-            </a-form-item>
-
-            <div class="form-footer">
-              <span class="footer-text">已有账号？</span>
-              <a-link @click="goLogin" class="footer-link">立即登录</a-link>
-            </div>
-          </a-form>
+        <div class="register-tips">
+          <div class="tip-item">
+            <icon-check-circle class="tip-icon" />
+            <span>账号长度至少4位</span>
+          </div>
+          <div class="tip-item">
+            <icon-check-circle class="tip-icon" />
+            <span>密码长度至少8位</span>
+          </div>
+          <div class="tip-item">
+            <icon-check-circle class="tip-icon" />
+            <span>注册即可免费使用全部功能</span>
+          </div>
         </div>
       </div>
     </div>
@@ -138,7 +165,8 @@ import {
   IconLock,
   IconSafe,
   IconCode,
-  IconBulb,
+  IconThunderbolt,
+  IconCheckCircle,
 } from "@arco-design/web-vue/es/icon";
 
 const router = useRouter();
@@ -167,267 +195,392 @@ const goLogin = () => {
 <style scoped>
 .register-page {
   min-height: 100vh;
-  background: #f8fafc;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
   font-family: var(--font-body);
 }
 
-/* 背景图案 */
-.bg-pattern {
-  position: absolute;
-  inset: 0;
-  background-image: radial-gradient(circle at 1px 1px, #e2e8f0 1px, transparent 0);
-  background-size: 24px 24px;
-  opacity: 0.6;
-}
-
-/* 主内容布局 */
-.register-wrapper {
-  display: flex;
-  gap: var(--space-10);
-  max-width: 880px;
-  width: 100%;
-  padding: var(--space-6);
-  position: relative;
-  z-index: 10;
-}
-
-/* 左侧品牌区 */
-.brand-panel {
+/* ========== 左侧视觉面板 ========== */
+.visual-panel {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-8);
-}
-
-.brand-header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.logo-box {
-  width: 44px;
-  height: 44px;
-  background: var(--color-primary-500);
-  border-radius: var(--radius-md);
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  min-height: 100vh;
+}
+
+.visual-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);
+}
+
+.visual-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+.visual-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 80% 50%, rgba(139,92,246,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 80%, rgba(6,182,212,0.2) 0%, transparent 50%);
+}
+
+.visual-content {
+  position: relative;
+  z-index: 1;
+  padding: 48px;
+  max-width: 520px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  animation: fadeInUp 0.6s var(--ease-out);
+}
+
+.brand-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.logo-box {
+  width: 56px;
+  height: 56px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
 .logo {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   filter: brightness(0) invert(1);
 }
 
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
 .brand-name {
-  font-size: var(--text-xl);
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
   margin: 0;
   font-family: var(--font-display);
 }
 
-.brand-desc {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+.brand-slogan {
+  font-size: 15px;
+  color: rgba(255,255,255,0.7);
   margin: 0;
 }
 
 /* 代码展示框 */
 .code-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
+  background: rgba(15,23,42,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(10px);
 }
 
 .code-header {
-  background: #f1f5f9;
-  padding: var(--space-2) var(--space-3);
-  border-bottom: 1px solid var(--border-default);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
+.code-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dot.red { background: #ef4444; }
+.dot.yellow { background: #f59e0b; }
+.dot.green { background: #22c55e; }
+
 .file-name {
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
   font-family: var(--font-mono);
 }
 
 .code-content {
-  padding: var(--space-4);
+  padding: 16px;
   font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  line-height: 1.6;
+  font-size: 12.5px;
+  line-height: 1.7;
+  overflow-x: auto;
 }
 
 .code-content code {
-  color: var(--text-primary);
+  color: #e2e8f0;
 }
 
-.keyword { color: #7c3aed; }
-.method { color: #059669; }
-.comment { color: #94a3b8; }
-.string { color: #f59e0b; }
-.number { color: #dc2626; }
-.builtin { color: #2563eb; }
+.keyword { color: #c084fc; }
+.class-name { color: #60a5fa; }
+.method { color: #34d399; }
+.number { color: #fb923c; }
 
-/* 特性列表 */
-.features-list {
+.code-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 16px 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.code-author {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  font-family: var(--font-mono);
+  font-style: italic;
+}
+
+/* 特性网格 */
+.features-grid {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 12px;
 }
 
-.feature-item {
+.feature-card {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
 }
 
-.feature-icon {
-  width: 32px;
-  height: 32px;
-  background: #f1f5f9;
-  border-radius: var(--radius-sm);
+.feature-card:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.feature-card .feature-icon {
+  font-size: 20px;
+  color: #60a5fa;
+  flex-shrink: 0;
+}
+
+.feature-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.feature-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.feature-desc {
+  font-size: 11px;
+  color: rgba(255,255,255,0.5);
+}
+
+.visual-footer {
+  margin-top: auto;
+}
+
+.visual-footer a {
+  color: rgba(255,255,255,0.4);
+  font-size: 12px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.visual-footer a:hover {
+  color: rgba(255,255,255,0.7);
+}
+
+/* ========== 右侧表单面板 ========== */
+.form-panel {
+  width: 480px;
+  min-width: 480px;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-primary-500);
+  background: #ffffff;
+  padding: 48px;
 }
 
-.feature-text {
-  font-size: var(--text-sm);
-  color: var(--text-primary);
-}
-
-/* 右侧表单 */
-.form-panel {
-  flex: 1;
-  display: flex;
-  align-items: center;
-}
-
-.form-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  padding: var(--space-8);
+.form-inner {
   width: 100%;
   max-width: 360px;
-  box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.5s var(--ease-out) 0.2s backwards;
 }
 
 .form-header {
-  margin-bottom: var(--space-6);
-  text-align: center;
+  margin-bottom: 32px;
 }
 
 .form-title {
-  font-size: var(--text-xl);
-  font-weight: 600;
+  font-size: 24px;
+  font-weight: 700;
   color: var(--text-primary);
-  margin: 0 0 var(--space-2) 0;
-  font-family: var(--font-display);
+  margin: 0 0 8px 0;
 }
 
 .form-subtitle {
-  font-size: var(--text-sm);
+  font-size: 14px;
   color: var(--text-secondary);
   margin: 0;
 }
 
 /* 表单样式 */
 .register-form :deep(.arco-form-item) {
-  margin-bottom: var(--space-4);
+  margin-bottom: 16px;
 }
 
 .register-form :deep(.arco-input-wrapper) {
-  border-radius: var(--radius-md);
+  border-radius: 8px;
+  height: 44px;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.register-form :deep(.arco-input-wrapper:hover) {
+  border-color: var(--color-primary-400);
+}
+
+.register-form :deep(.arco-input-wrapper.arco-input-focus) {
+  background: #ffffff;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
 }
 
 .register-form :deep(.arco-input-prefix) {
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
 }
 
-/* 提交按钮 */
 .submit-btn {
-  border-radius: var(--radius-md);
-  font-weight: 500;
-  height: 40px;
-  transition: transform 0.15s, box-shadow 0.15s;
+  border-radius: 8px;
+  font-weight: 600;
+  height: 44px;
+  font-size: 15px;
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
+  border: none;
+  box-shadow: 0 4px 14px rgba(59,130,246,0.35);
+  transition: all 0.2s;
 }
 
 .submit-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 6px 20px rgba(59,130,246,0.45);
 }
 
 .submit-btn:active {
   transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(59,130,246,0.3);
 }
 
-/* 表单底部 */
 .form-footer {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  margin-top: var(--space-4);
+  gap: 6px;
+  margin-top: 16px;
 }
 
 .footer-text {
-  font-size: var(--text-sm);
+  font-size: 13px;
   color: var(--text-secondary);
 }
 
 .footer-link {
-  font-size: var(--text-sm);
+  font-size: 13px;
   color: var(--color-primary-500);
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* 响应式 */
-@media (max-width: 768px) {
-  .register-wrapper {
+/* 注册提示 */
+.register-tips {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tip-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tip-icon {
+  font-size: 14px;
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+
+.tip-item span {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 960px) {
+  .register-page {
     flex-direction: column;
-    gap: var(--space-6);
-    padding: var(--space-4);
   }
 
-  .brand-panel {
+  .visual-panel {
+    min-height: auto;
+    padding: 40px 24px;
+  }
+
+  .visual-content {
+    padding: 0;
+    max-width: 100%;
+    gap: 24px;
+  }
+
+  .code-box {
+    display: none;
+  }
+
+  .brand-section {
     align-items: center;
     text-align: center;
   }
 
-  .brand-header {
-    flex-direction: column;
-    gap: var(--space-2);
+  .features-grid {
+    display: none;
   }
 
-  .features-list {
-    align-items: center;
-  }
-
-  .code-box {
+  .form-panel {
     width: 100%;
-    max-width: 300px;
+    min-width: 100%;
+    min-height: auto;
+    padding: 32px 24px;
   }
 
-  .form-card {
+  .form-inner {
     max-width: 100%;
   }
 }

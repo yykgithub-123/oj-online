@@ -138,6 +138,7 @@
         :columns="columns"
         :data="dataList"
         :loading="loading"
+        :scroll="{ x: 1000 }"
         :pagination="{
           showTotal: true,
           pageSize: searchParams.pageSize,
@@ -784,8 +785,12 @@ const handleAvatarError = (event: Event) => {
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-default);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow: visible;
   animation: fadeInUp 0.6s var(--ease-out) calc(var(--stagger-delay) * 7) backwards;
+}
+
+.table-section :deep(.arco-table-container) {
+  overflow-x: auto;
 }
 
 .data-table {

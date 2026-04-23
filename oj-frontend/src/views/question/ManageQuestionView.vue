@@ -163,6 +163,7 @@
         :columns="columns"
         :data="dataList"
         :loading="loading"
+        :scroll="{ x: 1500 }"
         :pagination="{
           showTotal: true,
           pageSize: searchParams.pageSize,
@@ -273,22 +274,25 @@
         <!-- 操作 -->
         <template #action="{ record }">
           <div class="action-cell">
-            <a-button type="primary" size="small" @click="doUpdate(record)" class="edit-btn">
-              <icon-edit />
-              编辑
-            </a-button>
-            <a-button type="text" size="small" @click="viewDetail(record)" class="view-btn action">
-              <icon-eye />
-              查看
-            </a-button>
+            <a-tooltip content="编辑">
+              <a-button type="primary" size="small" @click="doUpdate(record)" class="edit-btn">
+                <icon-edit />
+              </a-button>
+            </a-tooltip>
+            <a-tooltip content="查看">
+              <a-button type="outline" size="small" @click="viewDetail(record)" class="view-action-btn">
+                <icon-eye />
+              </a-button>
+            </a-tooltip>
             <a-popconfirm
               content="确定要删除这个题目吗？"
               @ok="doDelete(record)"
             >
-              <a-button status="danger" size="small" class="delete-btn">
-                <icon-delete />
-                删除
-              </a-button>
+              <a-tooltip content="删除">
+                <a-button status="danger" size="small" class="delete-btn">
+                  <icon-delete />
+                </a-button>
+              </a-tooltip>
             </a-popconfirm>
           </div>
         </template>
@@ -433,7 +437,7 @@ const loadData = async () => {
     if (params.difficulty === '') params.difficulty = undefined;
     if (params.tags.length === 0) params.tags = undefined;
 
-    const res = await QuestionControllerService.listQuestionVoByPageUsingPost(params);
+    const res = await QuestionControllerService.listQuestionByPageUsingPost(params);
     if (res.code === 0) {
       dataList.value = res.data.records;
       total.value = res.data.total;
@@ -507,16 +511,16 @@ const getAnswerPreview = (answer: string) => {
 };
 
 const columns = [
-  { title: "题目标题", slotName: "title", width: 180, ellipsis: true, tooltip: true },
+  { title: "题目标题", slotName: "title", width: 160, ellipsis: true, tooltip: true },
   { title: "难度", slotName: "difficulty", width: 80, align: "center" },
-  { title: "标签", slotName: "tags", width: 120 },
-  { title: "内容", slotName: "content", width: 180 },
-  { title: "答案", slotName: "answer", width: 180 },
-  { title: "统计数据", slotName: "stats", width: 120, align: "center" },
-  { title: "判题配置", slotName: "judgeConfig", width: 140 },
+  { title: "标签", slotName: "tags", width: 130 },
+  { title: "内容", slotName: "content", width: 180, ellipsis: true },
+  { title: "答案", slotName: "answer", width: 180, ellipsis: true },
+  { title: "统计", slotName: "stats", width: 100, align: "center" },
+  { title: "判题配置", slotName: "judgeConfig", width: 120 },
   { title: "测试用例", slotName: "judgeCase", width: 100, align: "center" },
-  { title: "创建时间", slotName: "createTime", width: 110, align: "center" },
-  { title: "操作", slotName: "action", width: 180, align: "center", fixed: "right" },
+  { title: "创建时间", slotName: "createTime", width: 120, align: "center" },
+  { title: "操作", slotName: "action", width: 120, align: "center", fixed: "right" },
 ];
 
 const onPageChange = (page: number) => {
@@ -590,22 +594,24 @@ const viewTestCases = (record: any) => {
   testCaseVisible.value = true;
 };
 
-const formatJudgeConfig = (judgeConfig: string) => {
+const formatJudgeConfig = (judgeConfig: any) => {
   if (!judgeConfig) return {};
   try {
-    const config = JSON.parse(judgeConfig);
+    const config = typeof judgeConfig === 'string' ? JSON.parse(judgeConfig) : judgeConfig;
+    if (!config.timeLimit && !config.memoryLimit) return {};
     return {
-      "时间": `${config.timeLimit}ms`,
-      "内存": `${config.memoryLimit}KB`,
+      "时间": `${config.timeLimit || 0}ms`,
+      "内存": `${config.memoryLimit || 0}KB`,
     };
   } catch (e) {
     return {};
   }
 };
 
-const parseTestCases = (judgeCase: string) => {
+const parseTestCases = (judgeCase: any) => {
   if (!judgeCase) return [];
   try {
+    if (Array.isArray(judgeCase)) return judgeCase;
     return JSON.parse(judgeCase);
   } catch (e) {
     return [];
@@ -865,8 +871,16 @@ const parseTestCases = (judgeCase: string) => {
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-default);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow: visible;
   animation: fadeInUp 0.6s var(--ease-out) calc(var(--stagger-delay) * 7) backwards;
+}
+
+.table-section :deep(.arco-table) {
+  border-radius: 0;
+}
+
+.table-section :deep(.arco-table-container) {
+  overflow-x: auto;
 }
 
 .table-header-bar {
@@ -1040,8 +1054,9 @@ const parseTestCases = (judgeCase: string) => {
   align-items: center;
   justify-content: center;
   gap: var(--space-1);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .time-icon {
@@ -1051,20 +1066,19 @@ const parseTestCases = (judgeCase: string) => {
 /* 操作按钮 */
 .action-cell {
   display: flex;
-  gap: var(--space-1);
+  gap: var(--space-2);
   justify-content: center;
+  flex-wrap: nowrap;
 }
 
-.edit-btn {
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: var(--text-xs);
-}
-
+.edit-btn,
+.view-action-btn,
 .delete-btn {
   border-radius: var(--radius-md);
   font-weight: 600;
   font-size: var(--text-xs);
+  min-width: 28px;
+  padding: 0 6px;
 }
 
 /* 分页 */
