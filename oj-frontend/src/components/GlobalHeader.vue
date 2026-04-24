@@ -10,7 +10,7 @@
         <nav class="nav-menu">
           <a-menu mode="horizontal" :selected-keys="selectedKeys" @menu-item-click="doMenuClick">
             <a-menu-item key="/questions">浏览题目</a-menu-item>
-            <a-menu-item v-if="isAdmin" key="/question_submit">浏览题目提交</a-menu-item>
+            <a-menu-item v-if="isLoggedIn" key="/question_submit">{{ isAdmin ? '浏览题目提交' : '我的提交' }}</a-menu-item>
             <a-menu-item v-if="isAdmin" key="/add/question">创建题目</a-menu-item>
             <a-menu-item v-if="isAdmin" key="/manage/question">管理题目</a-menu-item>
             <a-menu-item key="ai-link" class="ai-menu-item">亚克AI</a-menu-item>
@@ -85,6 +85,11 @@ store.dispatch("user/getLoginUser");
 
 const isAdmin = computed(() => {
   return store.state.user?.loginUser?.userRole === ACCESS_ENUM.ADMIN;
+});
+
+const isLoggedIn = computed(() => {
+  const user = store.state.user?.loginUser;
+  return !!(user && user.id && user.userName !== '未登录');
 });
 
 // 菜单点击处理

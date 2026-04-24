@@ -12,7 +12,7 @@
           </a-breadcrumb>
         </div>
         
-        <a-tabs default-active-key="question" class="question-tabs">
+        <a-tabs v-model:active-key="activeTab" class="question-tabs">
           <a-tab-pane key="question" title="题目">
             <div class="question-content">
               <div class="question-info">
@@ -31,7 +31,40 @@
               <div class="question-description">
                 <h3>题目描述</h3>
                 <div class="content-text">
-                  <MdViewer :value="question?.content || ''" />
+                  <MdViewer :value="parsedContent.description" />
+                </div>
+              </div>
+
+              <div class="question-input" v-if="parsedContent.input">
+                <h3>输入描述</h3>
+                <div class="content-text">
+                  <MdViewer :value="parsedContent.input" />
+                </div>
+              </div>
+
+              <div class="question-output" v-if="parsedContent.output">
+                <h3>输出描述</h3>
+                <div class="content-text">
+                  <MdViewer :value="parsedContent.output" />
+                </div>
+              </div>
+
+              <div class="question-examples" v-if="parsedContent.examples && parsedContent.examples.length > 0">
+                <h3>输入输出样例</h3>
+                <div class="example-section">
+                  <div v-for="(example, idx) in parsedContent.examples" :key="idx" class="example-item">
+                    <div class="example-label">示例 {{ idx + 1 }}</div>
+                    <div class="example-content">
+                      <div class="input-section">
+                        <div class="section-title">输入</div>
+                        <div class="code-block">{{ example.input }}</div>
+                      </div>
+                      <div class="output-section">
+                        <div class="section-title">输出</div>
+                        <div class="code-block">{{ example.output }}</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
               
@@ -154,7 +187,7 @@
             <div class="action-right">
               <!-- 调试按钮已隐藏 -->
               <!-- <a-button class="test-btn" @click="runTest">调试</a-button> -->
-              <a-button type="primary" class="submit-btn" @click="doSubmit">提交检测</a-button>
+              <a-button type="primary" class="submit-btn" :loading="submitting || judging" @click="doSubmit">{{ judging ? '判题中...' : '提交检测' }}</a-button>
             </div>
           </div>
           
@@ -180,7 +213,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watchEffect, withDefaults, defineProps, computed } from "vue";
+import { onMounted, onBeforeUnmount, ref, watchEffect, withDefaults, defineProps, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
 import { IconHome, IconRefresh, IconSettings } from '@arco-design/web-vue/es/icon';
@@ -206,7 +239,46 @@ const router = useRouter();
 const route = useRoute();
 const store = useStore();
 
+// 当前激活的 tab（题目/题解/记录）
+const activeTab = ref<string>("question");
+// 提交状态：是否正在判题中、是否正在提交
+const submitting = ref(false);
+const judging = ref(false);
+
 const userSubmitRecords = ref([]);
+
+// 解析 content 字段（兼容 JSON 和纯 Markdown）
+const parsedContent = computed(() => {
+  const raw = question.value?.content || '';
+  // 从 judgeCase 获取样例（后端只返回第一个测试用例）
+  const judgeCaseExamples = (question.value?.judgeCase || [])
+    .filter((c: any) => c.input || c.output)
+    .map((c: any) => ({ input: c.input || '', output: c.output || '' }));
+
+  try {
+    const obj = JSON.parse(raw);
+    if (typeof obj === 'object' && obj !== null) {
+      // 构建样例列表：优先用 content JSON 中的 examples，其次用 judgeCase
+      let examples: Array<{ input: string; output: string }> = [];
+      if (Array.isArray(obj.examples) && obj.examples.length > 0) {
+        examples = obj.examples;
+      } else if (obj.sampleInput || obj.sampleOutput) {
+        examples = [{ input: obj.sampleInput || '', output: obj.sampleOutput || '' }];
+      } else if (judgeCaseExamples.length > 0) {
+        examples = judgeCaseExamples;
+      }
+      return {
+        description: obj.description || obj.content || raw,
+        input: obj.input || obj.inputDescription || '',
+        output: obj.output || obj.outputDescription || '',
+        examples,
+      };
+    }
+  } catch (e) {
+    // 不是 JSON，当做纯 Markdown
+  }
+  return { description: raw, input: '', output: '', examples: judgeCaseExamples };
+});
 
 // 通过率计算属性
 const passRate = computed(() => {
@@ -242,24 +314,80 @@ const form = ref<QuestionSubmitAddRequest>({
 });
 
 /**
- * 提交代码
+ * 提交代码 - 自动切换到记录 tab，并轮询判题结果
  */
 const doSubmit = async () => {
   if (!question.value?.id) {
     return;
   }
-
-  const res = await QuestionControllerService.doQuestionSubmitUsingPost({
-    ...form.value,
-    questionId: question.value.id,
-  });
-  if (res.code === 0) {
-    message.success("提交成功");
-    // 提交成功后刷新记录列表
-    await loadUserSubmitRecords();
-  } else {
-    message.error("提交失败," + res.message);
+  if (!form.value.code || !(form.value.code as string).trim()) {
+    message.warning("请先输入代码");
+    return;
   }
+
+  submitting.value = true;
+  try {
+    const res = await QuestionControllerService.doQuestionSubmitUsingPost({
+      ...form.value,
+      questionId: question.value.id,
+    });
+    if (res.code === 0) {
+      message.success("提交成功，正在判题...");
+      // 自动切换到记录 tab
+      activeTab.value = "records";
+      // 刷新一次
+      await loadUserSubmitRecords();
+      // 开始轮询，等待判题完成
+      const submitId = (res.data as unknown) as number;
+      pollJudgeResult(submitId);
+    } else {
+      message.error("提交失败," + res.message);
+    }
+  } catch (error) {
+    message.error("提交异常，请稍后重试");
+  } finally {
+    submitting.value = false;
+  }
+};
+
+/**
+ * 轮询判题结果，直到状态完成（成功/失败）或超时
+ */
+let pollTimer: number | null = null;
+const pollJudgeResult = (submitId: number) => {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+  }
+  judging.value = true;
+  const startTime = Date.now();
+  const MAX_POLL_MS = 30000; // 30秒超时
+  const INTERVAL_MS = 1500;
+
+  pollTimer = window.setInterval(async () => {
+    await loadUserSubmitRecords();
+    const target: any = userSubmitRecords.value.find((r: any) => r.id === submitId);
+    const status = target?.status;
+    // 状态 2=成功, 3=失败 表示判题完成
+    if (status === 2 || status === 3) {
+      stopPolling();
+      if (status === 2) {
+        message.success("判题通过！");
+      } else {
+        message.error("判题失败");
+      }
+    } else if (Date.now() - startTime > MAX_POLL_MS) {
+      stopPolling();
+      message.warning("判题超时，请稍后手动刷新查看结果");
+    }
+  }, INTERVAL_MS);
+};
+
+const stopPolling = () => {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+  judging.value = false;
 };
 
 /**
@@ -440,6 +568,11 @@ watchEffect(() => {
 const changeCode = (value: string) => {
   form.value.code = value;
 };
+
+// 组件卸载时清理轮询定时器
+onBeforeUnmount(() => {
+  stopPolling();
+});
 </script>
 
 <style scoped>

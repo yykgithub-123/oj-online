@@ -5,8 +5,12 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.transport.DockerHttpClient;
 import com.yyk.codesandbox.model.ExecuteCodeRequest;
 import com.yyk.codesandbox.model.ExecuteCodeResponse;
 import com.yyk.codesandbox.model.ExecuteMessage;
@@ -58,13 +62,19 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate {
     public List<ExecuteMessage> runFile(File userCodeFile, List<String> inputList) {
         String userCodeParentPath = userCodeFile.getParentFile().getAbsolutePath();
 
-        // 获取 Docker Client（Windows 需要指定 TCP 地址）
+        // 获取 Docker Client（Windows 使用 npipe，Linux/Mac 使用 unix socket）
         String dockerHost = System.getProperty("os.name").toLowerCase().contains("win")
-                ? "tcp://localhost:2375"
-                : null;
-        DockerClient dockerClient = dockerHost != null
-                ? DockerClientBuilder.getInstance(dockerHost).build()
-                : DockerClientBuilder.getInstance().build();
+                ? "npipe:////./pipe/docker_engine"
+                : "unix:///var/run/docker.sock";
+        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
+                .withDockerHost(dockerHost)
+                .build();
+        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
+                .dockerHost(config.getDockerHost())
+                .build();
+        DockerClient dockerClient = DockerClientBuilder.getInstance(config)
+                .withDockerHttpClient(httpClient)
+                .build();
 
         // 拉取镜像
         String image = "eclipse-temurin:17-jdk-alpine";

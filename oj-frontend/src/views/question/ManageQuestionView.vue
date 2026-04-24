@@ -163,7 +163,6 @@
         :columns="columns"
         :data="dataList"
         :loading="loading"
-        :scroll="{ x: 1500 }"
         :pagination="{
           showTotal: true,
           pageSize: searchParams.pageSize,
@@ -201,28 +200,6 @@
             >
               {{ tag }}
             </span>
-          </div>
-        </template>
-
-        <!-- 内容预览 -->
-        <template #content="{ record }">
-          <div class="preview-cell">
-            <div class="preview-text">{{ getContentPreview(record.content) }}</div>
-            <a-button type="text" size="small" @click="viewContent(record)" class="view-btn">
-              <icon-eye />
-              查看
-            </a-button>
-          </div>
-        </template>
-
-        <!-- 答案预览 -->
-        <template #answer="{ record }">
-          <div class="preview-cell">
-            <div class="preview-text">{{ getAnswerPreview(record.answer) }}</div>
-            <a-button type="text" size="small" @click="viewAnswer(record)" class="view-btn">
-              <icon-eye />
-              查看
-            </a-button>
           </div>
         </template>
 
@@ -500,27 +477,15 @@ const getDifficultyClass = (difficulty: string) => {
   }
 };
 
-const getContentPreview = (content: string) => {
-  if (!content) return '暂无内容';
-  return content.length > 50 ? content.substring(0, 50) + '...' : content;
-};
-
-const getAnswerPreview = (answer: string) => {
-  if (!answer) return '暂无答案';
-  return answer.length > 50 ? answer.substring(0, 50) + '...' : answer;
-};
-
 const columns = [
-  { title: "题目标题", slotName: "title", width: 160, ellipsis: true, tooltip: true },
-  { title: "难度", slotName: "difficulty", width: 80, align: "center" },
-  { title: "标签", slotName: "tags", width: 130 },
-  { title: "内容", slotName: "content", width: 180, ellipsis: true },
-  { title: "答案", slotName: "answer", width: 180, ellipsis: true },
-  { title: "统计", slotName: "stats", width: 100, align: "center" },
-  { title: "判题配置", slotName: "judgeConfig", width: 120 },
-  { title: "测试用例", slotName: "judgeCase", width: 100, align: "center" },
-  { title: "创建时间", slotName: "createTime", width: 120, align: "center" },
-  { title: "操作", slotName: "action", width: 120, align: "center", fixed: "right" },
+  { title: "题目标题", slotName: "title", ellipsis: true, tooltip: true },
+  { title: "难度", slotName: "difficulty", align: "center" },
+  { title: "标签", slotName: "tags" },
+  { title: "统计", slotName: "stats", align: "center" },
+  { title: "判题配置", slotName: "judgeConfig" },
+  { title: "测试用例", slotName: "judgeCase", align: "center" },
+  { title: "创建时间", slotName: "createTime", align: "center" },
+  { title: "操作", slotName: "action", align: "center" },
 ];
 
 const onPageChange = (page: number) => {
@@ -575,16 +540,6 @@ const exportData = () => {
 };
 
 const viewDetail = (record: any) => {
-  currentRecord.value = record;
-  detailVisible.value = true;
-};
-
-const viewContent = (record: any) => {
-  currentRecord.value = record;
-  detailVisible.value = true;
-};
-
-const viewAnswer = (record: any) => {
   currentRecord.value = record;
   detailVisible.value = true;
 };

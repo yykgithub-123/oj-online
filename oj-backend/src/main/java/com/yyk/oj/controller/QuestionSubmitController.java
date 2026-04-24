@@ -60,21 +60,23 @@ public class QuestionSubmitController {
     }
 
     /**
-     * 分页获取题目提交列表（除管理员外，普通用户只能看到公开信息，比如语言、题目标签等）
+     * 分页获取题目提交列表（管理员可查看所有，普通用户只能查看自己的提交）
      *
      * @return
      */
     @PostMapping("/list/page")
     public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
                                                                          HttpServletRequest request) {
+        // 获取登录用户
+        final User loginUser = userService.getLoginUser(request);
+        // 非管理员强制只能查询自己的提交记录，防止越权访问
+        if (!userService.isAdmin(loginUser)) {
+            questionSubmitQueryRequest.setUserId(loginUser.getId());
+        }
         long current = questionSubmitQueryRequest.getCurrent();
         long size = questionSubmitQueryRequest.getPageSize();
         Page<QuestionSubmit> questionPage = questionSubmitService.page(new Page<>(current, size),
-                // 获取的是所有的列表
                 questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
-        // 获取用户信息
-        final User loginUser = userService.getLoginUser(request);
-        // 进行过滤，只获取公开信息
         return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionPage, loginUser));
     }
 
