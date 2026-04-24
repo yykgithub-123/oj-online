@@ -150,10 +150,6 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         Long userId = questionSubmitQueryRequest.getUserId();
         String sortField = questionSubmitQueryRequest.getSortField();
         String sortOrder = questionSubmitQueryRequest.getSortOrder();
-
-        // 添加调试信息
-        System.out.println("查询参数 - language: " + language + ", status: " + status + ", questionId: " + questionId + ", userId: " + userId);
-
         // 拼接查询条件
         queryWrapper.eq(ObjectUtils.isNotEmpty(language), "language", language);
         queryWrapper.eq(ObjectUtils.isNotEmpty(userId), "userId", userId);
@@ -166,10 +162,6 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         } else {
             queryWrapper.orderByDesc("createTime");
         }
-        
-        // 打印生成的SQL
-        System.out.println("生成的SQL: " + queryWrapper.getSqlSegment());
-        
         return queryWrapper;
     }
 

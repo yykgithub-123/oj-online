@@ -364,7 +364,6 @@ const loadData = async () => {
     if (params.tags.length === 0) params.tags = undefined;
 
     const res = await QuestionControllerService.listQuestionByPageUsingPost(params);
-    console.log("loadData params:", params, "response:", res);
     if (res.code === 0) {
       dataList.value = res.data.records;
       total.value = Number(res.data.total);
