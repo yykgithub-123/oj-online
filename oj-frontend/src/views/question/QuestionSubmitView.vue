@@ -143,7 +143,7 @@
           showTotal: true,
           pageSize: searchParams.pageSize,
           current: searchParams.current,
-          total,
+          total: pageTotal,
           showJumper: true,
           showSizeChanger: true,
         }"
@@ -287,12 +287,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watchEffect, computed } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import {
   Question,
   QuestionControllerService,
   QuestionSubmitQueryRequest,
 } from "../../../generated";
+import axios from "axios";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import moment from "moment";
@@ -315,6 +316,7 @@ const loading = ref(false);
 
 const dataList = ref([]);
 const total = ref(0);
+const pageTotal = ref(0);
 
 // 代码查看模态框
 const codeModalVisible = ref(false);
@@ -327,20 +329,25 @@ const searchParams = ref<QuestionSubmitQueryRequest>({
   current: 1,
 });
 
-// 统计数据
-const successCount = computed(() => {
-  return dataList.value.filter((item: any) => item.status === 2).length;
-});
+// 统计数据（从后端获取，非当前页计算）
+const successCount = ref(0);
+const failCount = ref(0);
+const successRate = ref(0);
 
-const failCount = computed(() => {
-  return dataList.value.filter((item: any) => item.status === 3).length;
-});
-
-const successRate = computed(() => {
-  const totalItems = dataList.value.length;
-  if (totalItems === 0) return 0;
-  return Math.round((successCount.value / totalItems) * 100);
-});
+const loadStats = async () => {
+  try {
+    const res = await axios.get("/api/question/question_submit/stats");
+    if (res.data.code === 0) {
+      const stats = res.data.data;
+      total.value = stats.total;
+      successCount.value = stats.successCount;
+      failCount.value = stats.failCount;
+      successRate.value = stats.successRate;
+    }
+  } catch (e) {
+    console.error("加载统计数据失败", e);
+  }
+};
 
 const loadData = async () => {
   loading.value = true;
@@ -358,7 +365,7 @@ const loadData = async () => {
     const res = await QuestionControllerService.listQuestionSubmitByPageUsingPost(params);
     if (res.code === 0) {
       dataList.value = res.data.records;
-      total.value = res.data.total;
+      pageTotal.value = res.data.total;
     } else {
       message.error("加载失败，" + res.message);
     }
@@ -372,6 +379,7 @@ const loadData = async () => {
 
 const refreshData = () => {
   loadData();
+  loadStats();
   message.success("数据已刷新");
 };
 
@@ -411,6 +419,7 @@ onMounted(() => {
     originalError.apply(console, args);
   };
   loadData();
+  loadStats();
 });
 
 const columns = [

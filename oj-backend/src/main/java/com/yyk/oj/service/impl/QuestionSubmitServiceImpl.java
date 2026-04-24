@@ -160,8 +160,12 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         queryWrapper.eq(ObjectUtils.isNotEmpty(questionId), "questionId", questionId);
         queryWrapper.eq(StringUtils.isNotBlank(status), "status", status);
         queryWrapper.eq("isDelete", false);
-        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
-                sortField);
+        // 自定义排序，默认按创建时间倒序（最新提交在前）
+        if (SqlUtils.validSortField(sortField)) {
+            queryWrapper.orderBy(true, sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
+        } else {
+            queryWrapper.orderByDesc("createTime");
+        }
         
         // 打印生成的SQL
         System.out.println("生成的SQL: " + queryWrapper.getSqlSegment());

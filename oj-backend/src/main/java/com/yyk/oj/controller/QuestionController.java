@@ -389,14 +389,51 @@ public class QuestionController {
     @PostMapping("/question_submit/list/page")
     public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
                                                                          HttpServletRequest request) {
+        // 获取登录用户
+        final User loginUser = userService.getLoginUser(request);
+        // 非管理员强制只能查询自己的提交记录，防止越权访问
+        if (!userService.isAdmin(loginUser)) {
+            questionSubmitQueryRequest.setUserId(loginUser.getId());
+        }
         long current = questionSubmitQueryRequest.getCurrent();
         long size = questionSubmitQueryRequest.getPageSize();
         // 从数据库中查询原始的题目提交分页信息
         Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size),
                 questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
-        final User loginUser = userService.getLoginUser(request);
         // 返回脱敏信息
         return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionSubmitPage, loginUser));
+    }
+
+    /**
+     * 获取提交统计信息（管理员看全部，普通用户看自己的）
+     */
+    @GetMapping("/question_submit/stats")
+    public BaseResponse<Map<String, Object>> getSubmitStats(HttpServletRequest request) {
+        final User loginUser = userService.getLoginUser(request);
+        boolean isAdmin = userService.isAdmin(loginUser);
+        Long userId = isAdmin ? null : loginUser.getId();
+
+        QueryWrapper<QuestionSubmit> totalQuery = new QueryWrapper<>();
+        totalQuery.eq("isDelete", false);
+        if (userId != null) totalQuery.eq("userId", userId);
+        long totalCount = questionSubmitService.count(totalQuery);
+
+        QueryWrapper<QuestionSubmit> successQuery = new QueryWrapper<>();
+        successQuery.eq("isDelete", false).eq("status", 2);
+        if (userId != null) successQuery.eq("userId", userId);
+        long successCount = questionSubmitService.count(successQuery);
+
+        QueryWrapper<QuestionSubmit> failQuery = new QueryWrapper<>();
+        failQuery.eq("isDelete", false).eq("status", 3);
+        if (userId != null) failQuery.eq("userId", userId);
+        long failCount = questionSubmitService.count(failQuery);
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("total", totalCount);
+        stats.put("successCount", successCount);
+        stats.put("failCount", failCount);
+        stats.put("successRate", totalCount > 0 ? Math.round((double) successCount / totalCount * 100) : 0);
+        return ResultUtils.success(stats);
     }
 
     /**
