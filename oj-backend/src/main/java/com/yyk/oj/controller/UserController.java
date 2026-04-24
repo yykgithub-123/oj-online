@@ -14,6 +14,7 @@ import com.yyk.oj.model.dto.user.UserAddRequest;
 import com.yyk.oj.model.dto.user.UserLoginRequest;
 import com.yyk.oj.model.dto.user.UserQueryRequest;
 import com.yyk.oj.model.dto.user.UserRegisterRequest;
+import com.yyk.oj.model.dto.user.UserChangePasswordRequest;
 import com.yyk.oj.model.dto.user.UserUpdateMyRequest;
 import com.yyk.oj.model.dto.user.UserUpdateRequest;
 import com.yyk.oj.model.entity.User;
@@ -317,6 +318,48 @@ public class UserController {
         BeanUtils.copyProperties(userUpdateMyRequest, user);
         user.setId(loginUser.getId());
         boolean result = userService.updateById(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 修改密码
+     *
+     * @param changePasswordRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/change/password")
+    public BaseResponse<Boolean> changePassword(@RequestBody UserChangePasswordRequest changePasswordRequest,
+                                                HttpServletRequest request) {
+        if (changePasswordRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String oldPassword = changePasswordRequest.getOldPassword();
+        String newPassword = changePasswordRequest.getNewPassword();
+        String confirmPassword = changePasswordRequest.getConfirmPassword();
+        if (StringUtils.isAnyBlank(oldPassword, newPassword, confirmPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不能为空");
+        }
+        if (newPassword.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "新密码长度不能少于8位");
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的新密码不一致");
+        }
+        User loginUser = userService.getLoginUser(request);
+        // 验证旧密码
+        String encryptOldPassword = DigestUtils.md5DigestAsHex((SALT + oldPassword).getBytes());
+        User dbUser = userService.getById(loginUser.getId());
+        if (!encryptOldPassword.equals(dbUser.getUserPassword())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "当前密码错误");
+        }
+        // 更新密码
+        String encryptNewPassword = DigestUtils.md5DigestAsHex((SALT + newPassword).getBytes());
+        User updateUser = new User();
+        updateUser.setId(loginUser.getId());
+        updateUser.setUserPassword(encryptNewPassword);
+        boolean result = userService.updateById(updateUser);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }

@@ -309,6 +309,7 @@ import { useStore } from "vuex";
 import { IconGift } from '@arco-design/web-vue/es/icon';
 import { getUserRankingList, getWeeklyUserRankingList, getUserStats } from "@/api/userController";
 import { getUserDailyActivity } from "@/api/questionSubmitController";
+import axios from "axios";
 
 const loading = ref(false);
 const searchKeyword = ref("");
@@ -333,11 +334,8 @@ const searchParams = ref<QuestionQueryRequest>({
   current: 1,
 });
 
-// 热门标签
-const popularTags = ref([
-  "数组", "哈希表", "字符串", "动态规划", "数学", "深度优先搜索",
-  "贪心", "广度优先搜索", "二分查找", "回溯", "栈", "堆"
-]);
+// 热门标签（从后端动态获取）
+const popularTags = ref<string[]>([]);
 
 // 难度选项
 const difficulties = ref([
@@ -465,7 +463,19 @@ watchEffect(() => {
   loadData();
 });
 
+const loadPopularTags = async () => {
+  try {
+    const res = await axios.get("/api/question/tags/popular", { params: { limit: 20 } });
+    if (res.data.code === 0 && res.data.data) {
+      popularTags.value = res.data.data;
+    }
+  } catch (e) {
+    console.error("加载标签失败", e);
+  }
+};
+
 onMounted(async () => {
+  loadPopularTags();
   await loadCheckInData();
   generateCalendar();
   currentUserId.value = getCurrentUserId();

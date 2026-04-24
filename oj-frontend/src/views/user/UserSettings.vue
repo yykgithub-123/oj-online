@@ -26,28 +26,14 @@
         </div>
         <div class="section-content">
           <a-form :model="accountForm" layout="vertical" @submit="updateAccount" class="settings-form">
-            <a-row :gutter="24">
-              <a-col :span="12">
-                <a-form-item label="用户名" name="userName">
-                  <a-input
-                    v-model="accountForm.userName"
-                    placeholder="请输入用户名"
-                    :maxlength="20"
-                    class="form-input"
-                  />
-                </a-form-item>
-              </a-col>
-              <a-col :span="12">
-                <a-form-item label="邮箱" name="userEmail">
-                  <a-input
-                    v-model="accountForm.userEmail"
-                    placeholder="请输入邮箱"
-                    type="email"
-                    class="form-input"
-                  />
-                </a-form-item>
-              </a-col>
-            </a-row>
+            <a-form-item label="用户名" name="userName">
+              <a-input
+                v-model="accountForm.userName"
+                placeholder="请输入用户名"
+                :maxlength="20"
+                class="form-input"
+              />
+            </a-form-item>
             <a-form-item label="个人简介" name="userProfile">
               <a-textarea
                 v-model="accountForm.userProfile"
@@ -126,65 +112,11 @@
           <h3 class="section-title">偏好设置</h3>
         </div>
         <div class="section-content">
-          <!-- 主题设置 -->
-          <div class="preference-item">
-            <div class="preference-info">
-              <h4 class="preference-title">主题设置</h4>
-              <p class="preference-desc">选择您喜欢的界面主题</p>
-            </div>
-            <div class="preference-control">
-              <div class="theme-options">
-                <div
-                  class="theme-option"
-                  :class="{ active: preferences.theme === 'light' }"
-                  @click="updateTheme('light')"
-                >
-                  <icon-sun />
-                  <span>浅色</span>
-                </div>
-                <div
-                  class="theme-option"
-                  :class="{ active: preferences.theme === 'dark' }"
-                  @click="updateTheme('dark')"
-                >
-                  <icon-moon />
-                  <span>深色</span>
-                </div>
-                <div
-                  class="theme-option"
-                  :class="{ active: preferences.theme === 'auto' }"
-                  @click="updateTheme('auto')"
-                >
-                  <icon-desktop />
-                  <span>自动</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <a-divider />
-
-          <!-- 语言设置 -->
-          <div class="preference-item">
-            <div class="preference-info">
-              <h4 class="preference-title">语言设置</h4>
-              <p class="preference-desc">选择界面显示语言</p>
-            </div>
-            <div class="preference-control">
-              <a-select v-model="preferences.language" style="width: 160px" @change="updateLanguage" class="form-select">
-                <a-option value="zh-CN">简体中文</a-option>
-                <a-option value="en-US">English</a-option>
-              </a-select>
-            </div>
-          </div>
-
-          <a-divider />
-
           <!-- 代码编辑器设置 -->
           <div class="preference-item">
             <div class="preference-info">
               <h4 class="preference-title">代码编辑器</h4>
-              <p class="preference-desc">配置代码编辑器的显示选项</p>
+              <p class="preference-desc">配置代码编辑器的显示选项（做题页面生效）</p>
             </div>
             <div class="preference-control">
               <div class="editor-settings">
@@ -216,116 +148,9 @@
               </div>
             </div>
           </div>
-
-          <a-divider />
-
-          <!-- 通知设置 -->
-          <div class="preference-item">
-            <div class="preference-info">
-              <h4 class="preference-title">通知设置</h4>
-              <p class="preference-desc">管理您接收的通知类型</p>
-            </div>
-            <div class="preference-control">
-              <div class="notification-settings">
-                <div class="notification-item">
-                  <a-switch v-model="preferences.notifications.email" @change="updateNotifications" />
-                  <span class="notification-label">
-                    <icon-email />
-                    邮件通知
-                  </span>
-                </div>
-                <div class="notification-item">
-                  <a-switch v-model="preferences.notifications.browser" @change="updateNotifications" />
-                  <span class="notification-label">
-                    <icon-notification />
-                    浏览器通知
-                  </span>
-                </div>
-                <div class="notification-item">
-                  <a-switch v-model="preferences.notifications.contest" @change="updateNotifications" />
-                  <span class="notification-label">
-                    <icon-trophy />
-                    比赛提醒
-                  </span>
-                </div>
-                <div class="notification-item">
-                  <a-switch v-model="preferences.notifications.yyk" @change="updateNotifications" />
-                  <span class="notification-label">
-                    <icon-book />
-                    题解更新
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
-      <!-- 数据管理 -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-icon data">
-            <icon-storage />
-          </div>
-          <h3 class="section-title">数据管理</h3>
-        </div>
-        <div class="section-content">
-          <!-- 导出数据 -->
-          <div class="data-item">
-            <div class="data-info">
-              <h4 class="data-title">
-                <icon-download />
-                导出数据
-              </h4>
-              <p class="data-desc">导出您的提交记录和个人数据</p>
-            </div>
-            <div class="data-control">
-              <a-button @click="exportData" :loading="exportLoading" class="action-btn export">
-                <icon-download />
-                导出数据
-              </a-button>
-            </div>
-          </div>
-
-          <a-divider />
-
-          <!-- 清除缓存 -->
-          <div class="data-item">
-            <div class="data-info">
-              <h4 class="data-title">
-                <icon-clear />
-                清除缓存
-              </h4>
-              <p class="data-desc">清除本地缓存数据，可能会提高性能</p>
-            </div>
-            <div class="data-control">
-              <a-button @click="clearCache" :loading="cacheLoading" class="action-btn clear">
-                <icon-clear />
-                清除缓存
-              </a-button>
-            </div>
-          </div>
-
-          <a-divider />
-
-          <!-- 删除账户 -->
-          <div class="data-item danger">
-            <div class="data-info">
-              <h4 class="data-title">
-                <icon-delete />
-                删除账户
-              </h4>
-              <p class="data-desc">永久删除您的账户和所有相关数据</p>
-            </div>
-            <div class="data-control">
-              <a-button status="danger" @click="showDeleteConfirm" class="action-btn delete">
-                <icon-delete />
-                删除账户
-              </a-button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
@@ -333,25 +158,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useStore } from "vuex";
-import { Modal } from "@arco-design/web-vue";
 import message from "@arco-design/web-vue/es/message";
+import axios from "axios";
 import {
   IconSettings,
   IconUser,
   IconLock,
   IconKey,
   IconPalette,
-  IconSun,
-  IconMoon,
-  IconDesktop,
-  IconEmail,
-  IconNotification,
-  IconTrophy,
-  IconBook,
-  IconStorage,
-  IconDownload,
-  IconClear,
-  IconDelete,
   IconCheck,
 } from '@arco-design/web-vue/es/icon';
 
@@ -359,7 +173,6 @@ const store = useStore();
 
 const accountForm = ref({
   userName: "",
-  userEmail: "",
   userProfile: "",
 });
 
@@ -370,22 +183,12 @@ const passwordForm = ref({
 });
 
 const preferences = ref({
-  theme: "light",
-  language: "zh-CN",
   editorFontSize: 14,
-  editorTheme: "vs",
-  notifications: {
-    email: true,
-    browser: true,
-    contest: true,
-    solution: false,
-  },
+  editorTheme: "vs-dark",
 });
 
 const accountLoading = ref(false);
 const passwordLoading = ref(false);
-const exportLoading = ref(false);
-const cacheLoading = ref(false);
 
 onMounted(() => {
   loadUserSettings();
@@ -396,7 +199,6 @@ const loadUserSettings = () => {
   if (loginUser) {
     accountForm.value = {
       userName: loginUser.userName || "",
-      userEmail: loginUser.userEmail || "",
       userProfile: loginUser.userProfile || "",
     };
   }
@@ -404,7 +206,9 @@ const loadUserSettings = () => {
   const savedPreferences = localStorage.getItem("userPreferences");
   if (savedPreferences) {
     try {
-      preferences.value = { ...preferences.value, ...JSON.parse(savedPreferences) };
+      const saved = JSON.parse(savedPreferences);
+      if (saved.editorFontSize) preferences.value.editorFontSize = saved.editorFontSize;
+      if (saved.editorTheme) preferences.value.editorTheme = saved.editorTheme;
     } catch (error) {
       console.error("加载偏好设置失败:", error);
     }
@@ -414,8 +218,16 @@ const loadUserSettings = () => {
 const updateAccount = async () => {
   accountLoading.value = true;
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    message.success("账户设置更新成功");
+    const res = await axios.post("/api/user/update/my", {
+      userName: accountForm.value.userName,
+      userProfile: accountForm.value.userProfile,
+    });
+    if (res.data.code === 0) {
+      message.success("个人信息更新成功");
+      await store.dispatch("user/getLoginUser");
+    } else {
+      message.error(res.data.message || "更新失败");
+    }
   } catch (error) {
     message.error("更新失败，请稍后重试");
   } finally {
@@ -429,98 +241,41 @@ const updatePassword = async () => {
     return;
   }
 
-  if (passwordForm.value.newPassword.length < 6) {
-    message.error("密码长度至少为6位");
+  if (passwordForm.value.newPassword.length < 8) {
+    message.error("密码长度至少为8位");
     return;
   }
 
   passwordLoading.value = true;
   try {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    message.success("密码修改成功");
-    passwordForm.value = {
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    };
-  } catch (error) {
-    message.error("密码修改失败，请稍后重试");
+    const res = await axios.post("/api/user/change/password", {
+      oldPassword: passwordForm.value.currentPassword,
+      newPassword: passwordForm.value.newPassword,
+      confirmPassword: passwordForm.value.confirmPassword,
+    });
+    if (res.data.code === 0) {
+      message.success("密码修改成功");
+      passwordForm.value = {
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      };
+    } else {
+      message.error(res.data.message || "密码修改失败");
+    }
+  } catch (error: any) {
+    const msg = error?.response?.data?.message || "密码修改失败，请稍后重试";
+    message.error(msg);
   } finally {
     passwordLoading.value = false;
   }
 };
 
-const updateTheme = (value: string) => {
-  preferences.value.theme = value;
-  savePreferences();
-  const themeNames = { light: '浅色', dark: '深色', auto: '自动' };
-  message.success(`已切换到${themeNames[value]}主题`);
-};
-
-const updateLanguage = (value: string) => {
-  preferences.value.language = value;
-  savePreferences();
-  message.success(`语言已切换到${value === 'zh-CN' ? '简体中文' : 'English'}`);
-};
-
 const updateEditorSettings = () => {
-  savePreferences();
-  message.success("编辑器设置已更新");
-};
-
-const updateNotifications = () => {
-  savePreferences();
-  message.success("通知设置已更新");
-};
-
-const savePreferences = () => {
   localStorage.setItem("userPreferences", JSON.stringify(preferences.value));
+  message.success("编辑器设置已更新，重新打开做题页面后生效");
 };
 
-const exportData = async () => {
-  exportLoading.value = true;
-  try {
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    message.success("数据导出成功，请检查下载文件");
-  } catch (error) {
-    message.error("数据导出失败，请稍后重试");
-  } finally {
-    exportLoading.value = false;
-  }
-};
-
-const clearCache = async () => {
-  cacheLoading.value = true;
-  try {
-    localStorage.removeItem("questionCache");
-    localStorage.removeItem("submissionCache");
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    message.success("缓存清除成功");
-  } catch (error) {
-    message.error("缓存清除失败");
-  } finally {
-    cacheLoading.value = false;
-  }
-};
-
-const showDeleteConfirm = () => {
-  Modal.confirm({
-    title: "确认删除账户",
-    content: "此操作将永久删除您的账户和所有相关数据，且无法恢复。请确认您要继续吗？",
-    okText: "确认删除",
-    cancelText: "取消",
-    okButtonProps: { danger: true },
-    onOk: async () => {
-      try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        message.success("账户删除成功");
-        store.dispatch("user/logout");
-      } catch (error) {
-        message.error("账户删除失败，请稍后重试");
-      }
-    },
-  });
-};
 </script>
 
 <style scoped>
@@ -721,42 +476,6 @@ const showDeleteConfirm = () => {
   margin-left: var(--space-6);
 }
 
-/* 主题选项 */
-.theme-options {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.theme-option {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  cursor: pointer;
-  transition: all var(--duration-fast);
-  background: var(--bg-card);
-  min-width: 70px;
-}
-
-.theme-option:hover {
-  border-color: var(--color-primary-300);
-  background: var(--color-primary-50);
-}
-
-.theme-option.active {
-  border-color: var(--color-primary-500);
-  background: var(--color-primary-50);
-  color: var(--color-primary-600);
-}
-
-.theme-option span {
-  font-size: var(--text-xs);
-  font-weight: 500;
-}
-
 /* 编辑器设置 */
 .editor-settings {
   display: flex;
@@ -781,95 +500,6 @@ const showDeleteConfirm = () => {
   color: var(--text-primary);
   font-weight: 500;
   min-width: 40px;
-}
-
-/* 通知设置 */
-.notification-settings {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3);
-}
-
-.notification-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.notification-label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--text-sm);
-  color: var(--text-primary);
-}
-
-/* 数据管理 */
-.data-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: var(--space-4) 0;
-}
-
-.data-item.danger .data-title {
-  color: var(--color-error);
-}
-
-.data-info {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-}
-
-.data-title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-base);
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 var(--space-1) 0;
-}
-
-.data-desc {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  margin: 0;
-}
-
-.data-control {
-  flex-shrink: 0;
-}
-
-.action-btn {
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  transition: all var(--duration-fast);
-}
-
-.action-btn:hover {
-  transform: translateY(-1px);
-}
-
-.action-btn:active {
-  transform: translateY(0) scale(0.98);
-}
-
-.action-btn.export {
-  background: var(--color-primary-50);
-  border-color: var(--color-primary-200);
-  color: var(--color-primary-600);
-}
-
-.action-btn.clear {
-  background: var(--color-warning-bg);
-  border-color: var(--color-warning-border);
-  color: var(--color-warning-text);
-}
-
-.action-btn.delete {
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 /* 响应式设计 */
@@ -897,29 +527,6 @@ const showDeleteConfirm = () => {
 
   .preference-control {
     margin-left: 0;
-  }
-
-  .theme-options {
-    width: 100%;
-    justify-content: stretch;
-  }
-
-  .theme-option {
-    flex: 1;
-  }
-
-  .notification-settings {
-    grid-template-columns: 1fr;
-  }
-
-  .data-item {
-    flex-direction: column;
-    gap: var(--space-3);
-    text-align: center;
-  }
-
-  .data-info {
-    flex-direction: column;
   }
 
   .setting-row {

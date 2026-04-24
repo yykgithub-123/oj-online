@@ -39,9 +39,9 @@
           </div>
           <div class="user-info">
             <h2 class="username">{{ userInfo.userName || "无名" }}</h2>
-            <p class="user-email">
-              <icon-email />
-              {{ userInfo.userEmail || "未设置邮箱" }}
+            <p class="user-account">
+              <icon-user />
+              {{ userInfo.userAccount || "未知账号" }}
             </p>
             <p class="user-profile" v-if="userInfo.userProfile">
               <icon-book />
@@ -51,24 +51,33 @@
         </div>
       </div>
 
-      <!-- 统计卡片 -->
+      <!-- 提交统计 -->
       <div class="stats-row">
         <div class="stat-card">
-          <div class="stat-icon solved">
-            <icon-check-circle />
+          <div class="stat-icon total">
+            <icon-file />
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ userStats.solvedCount || 0 }}</div>
-            <div class="stat-label">已解决</div>
+            <div class="stat-value">{{ submitStats.total }}</div>
+            <div class="stat-label">总提交</div>
           </div>
         </div>
         <div class="stat-card">
-          <div class="stat-icon submit">
-            <icon-code />
+          <div class="stat-icon success">
+            <icon-check-circle />
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ userStats.submitCount || 0 }}</div>
-            <div class="stat-label">总提交</div>
+            <div class="stat-value">{{ submitStats.successCount }}</div>
+            <div class="stat-label">通过</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon fail">
+            <icon-close-circle />
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ submitStats.failCount }}</div>
+            <div class="stat-label">失败</div>
           </div>
         </div>
         <div class="stat-card">
@@ -76,137 +85,43 @@
             <icon-trophy />
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ userStats.acceptRate || 0 }}%</div>
+            <div class="stat-value">{{ submitStats.successRate }}%</div>
             <div class="stat-label">通过率</div>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon rank">
-            <icon-fire />
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ userStats.ranking || '--' }}</div>
-            <div class="stat-label">排名</div>
-          </div>
-        </div>
       </div>
 
-      <!-- 解题统计 -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-icon chart">
-            <icon-bar-chart />
-          </div>
-          <h3 class="section-title">解题统计</h3>
+      <!-- 详细信息 -->
+      <div class="info-card">
+        <div class="info-header">
+          <icon-idcard />
+          <h3>账号信息</h3>
         </div>
-        <div class="section-content">
-          <div class="stats-grid">
-            <div class="difficulty-card easy">
-              <div class="difficulty-header">
-                <span class="difficulty-name">简单</span>
-                <span class="difficulty-count">{{ userStats.easySolved || 0 }}</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" :style="{ width: getProgressWidth('easy') }"></div>
-              </div>
-              <div class="progress-label">{{ getProgressText('easy') }}</div>
-            </div>
-            <div class="difficulty-card medium">
-              <div class="difficulty-header">
-                <span class="difficulty-name">中等</span>
-                <span class="difficulty-count">{{ userStats.mediumSolved || 0 }}</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" :style="{ width: getProgressWidth('medium') }"></div>
-              </div>
-              <div class="progress-label">{{ getProgressText('medium') }}</div>
-            </div>
-            <div class="difficulty-card hard">
-              <div class="difficulty-header">
-                <span class="difficulty-name">困难</span>
-                <span class="difficulty-count">{{ userStats.hardSolved || 0 }}</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" :style="{ width: getProgressWidth('hard') }"></div>
-              </div>
-              <div class="progress-label">{{ getProgressText('hard') }}</div>
-            </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">用户名</span>
+            <span class="info-value">{{ userInfo.userName || '未设置' }}</span>
           </div>
-        </div>
-      </div>
-
-      <!-- 最近活动 -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-icon activity">
-            <icon-history />
+          <div class="info-item">
+            <span class="info-label">账号</span>
+            <span class="info-value">{{ userInfo.userAccount || '未知' }}</span>
           </div>
-          <h3 class="section-title">最近活动</h3>
-        </div>
-        <div class="section-content">
-          <div class="activity-list">
-            <div
-              v-for="(activity, index) in recentActivities"
-              :key="activity.id"
-              class="activity-item"
-            >
-              <div class="activity-badge" :class="activity.status">
-                <icon-check v-if="activity.status === 'success'" />
-                <icon-close v-else />
-              </div>
-              <div class="activity-content">
-                <div class="activity-description">{{ activity.description }}</div>
-                <div class="activity-time">
-                  <icon-clock-circle />
-                  {{ formatTime(activity.time) }}
-                </div>
-              </div>
-            </div>
-            <div v-if="recentActivities.length === 0" class="empty-activity">
-              <icon-empty />
-              <p>暂无最近活动</p>
-            </div>
+          <div class="info-item">
+            <span class="info-label">角色</span>
+            <span class="info-value">
+              <a-tag :color="userInfo.userRole === 'admin' ? 'arcoblue' : 'green'" size="small">
+                {{ userInfo.userRole === 'admin' ? '管理员' : '普通用户' }}
+              </a-tag>
+            </span>
           </div>
-        </div>
-      </div>
-
-      <!-- 个人设置 -->
-      <div class="section-card">
-        <div class="section-header">
-          <div class="section-icon settings">
-            <icon-settings />
+          <div class="info-item">
+            <span class="info-label">注册时间</span>
+            <span class="info-value">{{ userInfo.createTime || '未知' }}</span>
           </div>
-          <h3 class="section-title">个人设置</h3>
-        </div>
-        <div class="section-content">
-          <a-form :model="userForm" layout="vertical" class="settings-form">
-            <a-row :gutter="24">
-              <a-col :span="12">
-                <a-form-item label="用户名">
-                  <a-input v-model="userForm.userName" placeholder="请输入用户名" class="form-input" />
-                </a-form-item>
-              </a-col>
-              <a-col :span="12">
-                <a-form-item label="邮箱">
-                  <a-input v-model="userForm.userEmail" placeholder="请输入邮箱" class="form-input" />
-                </a-form-item>
-              </a-col>
-            </a-row>
-            <a-form-item label="个人简介">
-              <a-textarea
-                v-model="userForm.userProfile"
-                placeholder="请输入个人简介"
-                :rows="3"
-                class="form-input"
-              />
-            </a-form-item>
-            <a-form-item>
-              <a-button type="primary" @click="updateProfile" class="save-btn">
-                <icon-check />
-                保存修改
-              </a-button>
-            </a-form-item>
-          </a-form>
+          <div class="info-item full-width" v-if="userInfo.userProfile">
+            <span class="info-label">个人简介</span>
+            <span class="info-value">{{ userInfo.userProfile }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -223,20 +138,14 @@ import { UserControllerService } from "../../../generated";
 import {
   IconUser,
   IconCamera,
-  IconEmail,
   IconBook,
+  IconFile,
   IconCheckCircle,
-  IconCode,
+  IconCloseCircle,
   IconTrophy,
-  IconFire,
-  IconBarChart,
-  IconHistory,
-  IconSettings,
-  IconCheck,
-  IconClose,
-  IconClockCircle,
-  IconEmpty,
+  IconIdcard,
 } from '@arco-design/web-vue/es/icon';
+import axios from "axios";
 
 const store = useStore();
 
@@ -245,32 +154,22 @@ const fileInput = ref<HTMLInputElement | null>(null);
 
 const userInfo = ref({
   userName: "",
-  userEmail: "",
+  userAccount: "",
   userProfile: "",
+  userRole: "",
+  createTime: "",
 });
 
-const userStats = ref({
-  solvedCount: 0,
-  submitCount: 0,
-  acceptRate: 0,
-  easySolved: 0,
-  mediumSolved: 0,
-  hardSolved: 0,
-  ranking: 128,
-});
-
-const recentActivities = ref([]);
-
-const userForm = ref({
-  userName: "",
-  userEmail: "",
-  userProfile: "",
+const submitStats = ref({
+  total: 0,
+  successCount: 0,
+  failCount: 0,
+  successRate: 0,
 });
 
 onMounted(() => {
   loadUserInfo();
-  loadUserStats();
-  loadRecentActivities();
+  loadSubmitStats();
 });
 
 const loadUserInfo = () => {
@@ -278,10 +177,13 @@ const loadUserInfo = () => {
   if (loginUser) {
     userInfo.value = {
       userName: loginUser.userName || "",
-      userEmail: loginUser.userEmail || "",
+      userAccount: loginUser.userAccount || "",
       userProfile: loginUser.userProfile || "",
+      userRole: loginUser.userRole || "user",
+      createTime: loginUser.createTime
+        ? new Date(loginUser.createTime).toLocaleDateString("zh-CN")
+        : "",
     };
-    userForm.value = { ...userInfo.value };
     avatarUrl.value = loginUser.userAvatar || "/yake.webp";
   }
 };
@@ -331,70 +233,14 @@ const handleAvatarChange = async (event: Event) => {
   (event.target as HTMLInputElement).value = "";
 };
 
-const loadUserStats = async () => {
-  userStats.value = {
-    solvedCount: 25,
-    submitCount: 100,
-    acceptRate: 25.0,
-    easySolved: 15,
-    mediumSolved: 8,
-    hardSolved: 2,
-    ranking: 128,
-  };
-};
-
-const loadRecentActivities = async () => {
-  recentActivities.value = [
-    { id: 1, description: "成功解决了题目：两数之和", time: new Date(Date.now() - 2 * 60 * 60 * 1000), status: "success" },
-    { id: 2, description: "成功解决了题目：反转链表", time: new Date(Date.now() - 5 * 60 * 60 * 1000), status: "success" },
-    { id: 3, description: "尝试解决题目：二叉树遍历失败", time: new Date(Date.now() - 8 * 60 * 60 * 1000), status: "fail" },
-    { id: 4, description: "成功解决了题目：二分查找", time: new Date(Date.now() - 24 * 60 * 60 * 1000), status: "success" },
-  ];
-};
-
-const getProgressWidth = (difficulty: string) => {
-  const total = userStats.value.solvedCount || 1;
-  let solved = 0;
-
-  switch (difficulty) {
-    case 'easy': solved = userStats.value.easySolved || 0; break;
-    case 'medium': solved = userStats.value.mediumSolved || 0; break;
-    case 'hard': solved = userStats.value.hardSolved || 0; break;
-  }
-
-  return `${Math.min((solved / total) * 100, 100)}%`;
-};
-
-const getProgressText = (difficulty: string) => {
-  const total = userStats.value.solvedCount || 1;
-  let solved = 0;
-
-  switch (difficulty) {
-    case 'easy': solved = userStats.value.easySolved || 0; break;
-    case 'medium': solved = userStats.value.mediumSolved || 0; break;
-    case 'hard': solved = userStats.value.hardSolved || 0; break;
-  }
-
-  return `${solved}/${total} 题`;
-};
-
-const formatTime = (time: Date) => {
-  const now = new Date();
-  const diff = now.getTime() - time.getTime();
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(hours / 24);
-
-  if (days > 0) return `${days}天前`;
-  else if (hours > 0) return `${hours}小时前`;
-  else return "刚刚";
-};
-
-const updateProfile = async () => {
+const loadSubmitStats = async () => {
   try {
-    message.success("个人资料更新成功");
-    userInfo.value = { ...userForm.value };
-  } catch (error) {
-    message.error("更新失败，请稍后重试");
+    const res = await axios.get("/api/question/question_submit/stats");
+    if (res.data.code === 0) {
+      submitStats.value = res.data.data;
+    }
+  } catch (e) {
+    console.error("加载提交统计失败", e);
   }
 };
 </script>
@@ -553,7 +399,7 @@ const updateProfile = async () => {
   font-weight: 700;
 }
 
-.user-email,
+.user-account,
 .user-profile {
   margin: 0 0 var(--space-2) 0;
   color: var(--text-secondary);
@@ -581,13 +427,13 @@ const updateProfile = async () => {
   border: 1px solid var(--border-default);
   box-shadow: var(--shadow-sm);
   transition: all var(--duration-fast);
-  animation: scaleIn 0.5s var(--ease-out) backwards;
+  animation: fadeInUp 0.5s var(--ease-out) backwards;
 }
 
-.stat-card:nth-child(1) { animation-delay: calc(var(--stagger-delay) * 3); }
-.stat-card:nth-child(2) { animation-delay: calc(var(--stagger-delay) * 4); }
-.stat-card:nth-child(3) { animation-delay: calc(var(--stagger-delay) * 5); }
-.stat-card:nth-child(4) { animation-delay: calc(var(--stagger-delay) * 6); }
+.stat-card:nth-child(1) { animation-delay: 0.15s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.25s; }
+.stat-card:nth-child(4) { animation-delay: 0.3s; }
 
 .stat-card:hover {
   transform: translateY(-2px);
@@ -604,10 +450,10 @@ const updateProfile = async () => {
   font-size: 20px;
 }
 
-.stat-icon.solved { background: var(--color-success-bg); color: var(--color-success); }
-.stat-icon.submit { background: var(--color-info-bg); color: var(--color-info); }
-.stat-icon.rate { background: var(--color-warning-bg); color: var(--color-warning); }
-.stat-icon.rank { background: #fef3c7; color: #d97706; }
+.stat-icon.total { background: var(--color-info-bg, #e0f2fe); color: var(--color-info, #3b82f6); }
+.stat-icon.success { background: var(--color-success-bg, #dcfce7); color: var(--color-success, #22c55e); }
+.stat-icon.fail { background: var(--color-error-bg, #fee2e2); color: var(--color-error, #ef4444); }
+.stat-icon.rate { background: #fef3c7; color: #d97706; }
 
 .stat-content {
   display: flex;
@@ -627,225 +473,81 @@ const updateProfile = async () => {
   margin-top: var(--space-1);
 }
 
-/* 区块卡片 */
-.section-card {
+/* 账号信息卡片 */
+.info-card {
   background: var(--bg-card);
   border-radius: var(--radius-xl);
   border: 1px solid var(--border-default);
   box-shadow: var(--shadow-sm);
-  margin-bottom: var(--space-5);
   overflow: hidden;
-  animation: fadeInUp 0.6s var(--ease-out) backwards;
+  animation: fadeInUp 0.6s var(--ease-out) 0.35s backwards;
 }
 
-.section-card:nth-of-type(1) { animation-delay: calc(var(--stagger-delay) * 7); }
-.section-card:nth-of-type(2) { animation-delay: calc(var(--stagger-delay) * 8); }
-.section-card:nth-of-type(3) { animation-delay: calc(var(--stagger-delay) * 9); }
-
-.section-header {
+.info-header {
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4) var(--space-5);
-  background: var(--bg-subtle);
+  background: var(--bg-subtle, #f8fafc);
   border-bottom: 1px solid var(--border-default);
+  font-size: 18px;
+  color: var(--color-primary-500, #3b82f6);
 }
 
-.section-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 16px;
-}
-
-.section-icon.chart { background: var(--color-primary-500); }
-.section-icon.activity { background: var(--color-accent-500); }
-.section-icon.settings { background: #8b5cf6; }
-
-.section-title {
+.info-header h3 {
+  margin: 0;
   font-size: var(--text-lg);
   font-weight: 600;
   color: var(--text-primary);
-  margin: 0;
 }
 
-.section-content {
-  padding: var(--space-5);
-}
-
-/* 解题统计 */
-.stats-grid {
+.info-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-4);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  padding: 0;
 }
 
-.difficulty-card {
-  padding: var(--space-5);
-  border-radius: var(--radius-lg);
-  border: 1px solid;
-  transition: all var(--duration-fast);
-}
-
-.difficulty-card:hover {
-  transform: translateY(-2px);
-}
-
-.difficulty-card.easy {
-  background: var(--color-success-bg);
-  border-color: var(--color-success-border);
-}
-
-.difficulty-card.medium {
-  background: var(--color-warning-bg);
-  border-color: var(--color-warning-border);
-}
-
-.difficulty-card.hard {
-  background: var(--color-error-bg);
-  border-color: var(--color-error-border);
-}
-
-.difficulty-header {
+.info-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-3);
-}
-
-.difficulty-name {
-  font-weight: 600;
-  font-size: var(--text-sm);
-}
-
-.difficulty-card.easy .difficulty-name { color: var(--color-success-text); }
-.difficulty-card.medium .difficulty-name { color: var(--color-warning-text); }
-.difficulty-card.hard .difficulty-name { color: var(--color-error-text); }
-
-.difficulty-count {
-  font-weight: 700;
-  font-size: var(--text-2xl);
-  color: var(--text-primary);
-}
-
-.progress-bar {
-  height: 6px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: var(--space-2);
-}
-
-.progress-fill {
-  height: 100%;
-  transition: width var(--duration-normal);
-  border-radius: 3px;
-}
-
-.difficulty-card.easy .progress-fill { background: var(--color-success); }
-.difficulty-card.medium .progress-fill { background: var(--color-warning); }
-.difficulty-card.hard .progress-fill { background: var(--color-error); }
-
-.progress-label {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-}
-
-/* 活动列表 */
-.activity-list {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.activity-item {
-  display: flex;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  border-radius: var(--radius-md);
-  transition: all var(--duration-fast);
-}
-
-.activity-item:hover {
-  background: var(--bg-subtle);
-}
-
-.activity-badge {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.activity-badge.success { background: var(--color-success-bg); color: var(--color-success); }
-.activity-badge.fail { background: var(--color-error-bg); color: var(--color-error); }
-
-.activity-content {
-  flex: 1;
-}
-
-.activity-description {
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  margin-bottom: var(--space-1);
-}
-
-.activity-time {
-  color: var(--text-tertiary);
-  font-size: var(--text-xs);
-  display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-default);
+  border-right: 1px solid var(--border-default);
 }
 
-.empty-activity {
-  text-align: center;
-  padding: var(--space-10) 0;
-  color: var(--text-tertiary);
+.info-item:nth-child(2n) {
+  border-right: none;
+}
+
+.info-item.full-width {
+  grid-column: 1 / -1;
+  border-right: none;
+}
+
+.info-item:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary, #94a3b8);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-value {
   font-size: var(--text-sm);
-}
-
-/* 设置表单 */
-.settings-form {
-  max-width: 600px;
-}
-
-.form-input :deep(.arco-input),
-.form-input :deep(.arco-textarea) {
-  border-radius: var(--radius-md);
-}
-
-.save-btn {
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.39);
-  transition: all var(--duration-fast);
-}
-
-.save-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
-}
-
-.save-btn:active {
-  transform: translateY(0) scale(0.98);
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 /* 响应式设计 */
 @media (max-width: 900px) {
   .stats-row {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -871,12 +573,20 @@ const updateProfile = async () => {
     flex-direction: column;
   }
 
+  .profile-card {
+    padding: var(--space-5);
+  }
+
   .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .info-grid {
     grid-template-columns: 1fr;
   }
 
-  .profile-card {
-    padding: var(--space-5);
+  .info-item {
+    border-right: none;
   }
 }
 </style>
