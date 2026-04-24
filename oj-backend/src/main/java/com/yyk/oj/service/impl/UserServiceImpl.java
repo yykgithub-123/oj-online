@@ -114,7 +114,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = this.baseMapper.selectOne(queryWrapper);
         // 用户不存在
         if (user == null) {
-            log.warn("[用户登录] 登录失败, account={}", userAccount);
+            log.warn("[用户登录] 登录失败, 账号={}", userAccount);
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
         }
         // 账号被封禁
@@ -315,7 +315,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         }
                         return stats;
                     } catch (Exception e) {
-                        log.error("获取用户统计信息失败: userId={}", user.getId(), e);
+                        log.error("[用户统计] 获取失败, 用户编号={}", user.getId(), e);
                         return null;
                     }
                 })
@@ -357,7 +357,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     try {
                         return getUserStats(user.getId());
                     } catch (Exception e) {
-                        log.error("获取用户统计信息失败: userId={}", user.getId(), e);
+                        log.error("[用户统计] 获取失败, 用户编号={}", user.getId(), e);
                         return null;
                     }
                 })
@@ -451,7 +451,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         }
                         return isAccepted;
                     } catch (Exception e) {
-                        log.error("解析判题信息失败, ID: {}, Error: {}", submit.getId(), e.getMessage());
+                        log.error("[用户统计] 解析判题信息失败, 提交编号={}, 原因={}", submit.getId(), e.getMessage());
                         return false;
                     }
                 })

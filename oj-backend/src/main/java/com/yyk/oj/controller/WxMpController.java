@@ -65,7 +65,7 @@ public class WxMpController {
                     .fromEncryptedXml(request.getInputStream(), wxMpService.getWxMpConfigStorage(), timestamp,
                             nonce,
                             msgSignature);
-            log.info("message content = {}", inMessage.getContent());
+            log.info("[微信公众号] 收到消息, 内容={}", inMessage.getContent());
             // 路由消息并处理
             WxMpXmlOutMessage outMessage = router.route(inMessage);
             if (outMessage == null) {
@@ -80,7 +80,7 @@ public class WxMpController {
 
     @GetMapping("/")
     public String check(String timestamp, String nonce, String signature, String echostr) {
-        log.info("check");
+        log.info("[微信公众号] 签名校验");
         if (wxMpService.checkSignature(timestamp, nonce, signature)) {
             return echostr;
         } else {
@@ -96,7 +96,7 @@ public class WxMpController {
      */
     @GetMapping("/setMenu")
     public String setMenu() throws WxErrorException {
-        log.info("setMenu");
+        log.info("[微信公众号] 设置菜单");
         WxMenu wxMenu = new WxMenu();
         // 菜单一
         WxMenuButton wxMenuButton1 = new WxMenuButton();

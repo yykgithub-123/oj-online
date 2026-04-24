@@ -125,7 +125,7 @@ public class UserController {
             }
             return ResultUtils.success(userService.userLoginByMpOpen(userInfo, request));
         } catch (Exception e) {
-            log.error("userLoginByWxOpen error", e);
+            log.error("[微信登录] 登录失败", e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败，系统错误");
         }
     }

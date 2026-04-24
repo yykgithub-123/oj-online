@@ -24,7 +24,7 @@ public class RemoteCodeSandbox implements CodeSandbox {
 
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
-        log.info("[代码沙箱] 调用远程沙箱, language={}", executeCodeRequest.getLanguage());
+        log.info("[代码沙箱] 调用远程沙箱, 语言={}", executeCodeRequest.getLanguage());
         String url = "http://localhost:8090/executeCode";
         String json = JSONUtil.toJsonStr(executeCodeRequest);
         String responseStr = HttpUtil.createPost(url)

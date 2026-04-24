@@ -51,7 +51,7 @@ public class LogInterceptor {
         } catch (Throwable e) {
             stopWatch.stop();
             long cost = stopWatch.getTotalTimeMillis();
-            log.warn("◆ {} {} | {} | {}ms | ip={} | params={} | error={}",
+            log.warn("◆ 请求异常 | {} {} | 编号={} | 耗时={}ms | 来源={} | 参数={} | 异常={}",
                     method, url, requestId, cost, ip, params, e.getMessage());
             throw e;
         }
@@ -59,10 +59,10 @@ public class LogInterceptor {
         stopWatch.stop();
         long cost = stopWatch.getTotalTimeMillis();
         if (cost >= SLOW_REQUEST_THRESHOLD) {
-            log.warn("◆ {} {} | {} | {}ms [慢] | ip={} | params={}",
+            log.warn("◆ 慢请求 | {} {} | 编号={} | 耗时={}ms | 来源={} | 参数={}",
                     method, url, requestId, cost, ip, params);
         } else {
-            log.info("◆ {} {} | {} | {}ms | ip={}",
+            log.info("◆ 请求完成 | {} {} | 编号={} | 耗时={}ms | 来源={}",
                     method, url, requestId, cost, ip);
         }
         return result;

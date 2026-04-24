@@ -69,14 +69,14 @@ public class FileController {
             // 返回可访问地址
             return ResultUtils.success(FileConstant.COS_HOST + filepath);
         } catch (Exception e) {
-            log.error("file upload error, filepath = " + filepath, e);
+            log.error("[文件上传] 上传失败, 路径={}", filepath, e);
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传失败");
         } finally {
             if (file != null) {
                 // 删除临时文件
                 boolean delete = file.delete();
                 if (!delete) {
-                    log.error("file delete error, filepath = {}", filepath);
+                    log.error("[文件上传] 临时文件删除失败, 路径={}", filepath);
                 }
             }
         }

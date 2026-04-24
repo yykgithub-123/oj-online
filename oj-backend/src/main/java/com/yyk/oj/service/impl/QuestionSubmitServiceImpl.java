@@ -115,11 +115,11 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         Long questionSubmitId = questionSubmit.getId();
         CompletableFuture.runAsync(() -> {
             try {
-                log.info("开始判题，提交ID: {}", questionSubmitId);
+                log.info("[判题服务] 开始判题, 提交编号={}", questionSubmitId);
                 judgeService.doJudge(questionSubmitId);
-                log.info("判题完成，提交ID: {}", questionSubmitId);
+                log.info("[判题服务] 判题完成, 提交编号={}", questionSubmitId);
             } catch (Exception e) {
-                log.error("判题失败，提交ID: {}", questionSubmitId, e);
+                log.error("[判题服务] 判题失败, 提交编号={}", questionSubmitId, e);
                 // 更新状态为失败
                 QuestionSubmit failedSubmit = new QuestionSubmit();
                 failedSubmit.setId(questionSubmitId);
@@ -324,7 +324,7 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
         submitUpdate.setSql("submitNum = GREATEST(0, submitNum - 1)");
         boolean updateSubmit = questionService.update(submitUpdate);
         if (!updateSubmit) {
-            log.error("更新submitNum失败, questionId: {}", questionId);
+            log.error("[提交管理] 更新提交数失败, 题目编号={}", questionId);
         }
         
         // 3. 如果是通过的记录，acceptedNum - 1
@@ -334,13 +334,13 @@ public class QuestionSubmitServiceImpl extends ServiceImpl<QuestionSubmitMapper,
             acceptUpdate.setSql("acceptedNum = GREATEST(0, acceptedNum - 1)");
             boolean updateAccept = questionService.update(acceptUpdate);
             if (!updateAccept) {
-                log.error("更新acceptedNum失败, questionId: {}", questionId);
+                log.error("[提交管理] 更新通过数失败, 题目编号={}", questionId);
             }
         }
         
         // 4. 执行删除
         boolean result = this.removeById(id);
-        log.info("删除提交记录: id={}, questionId={}, status={}, result={}", id, questionId, status, result);
+        log.info("[提交管理] 删除提交记录, 提交编号={}, 题目编号={}, 状态={}, 结果={}", id, questionId, status, result);
         return result;
     }
 }
