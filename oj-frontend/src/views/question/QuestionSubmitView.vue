@@ -145,9 +145,9 @@
           current: searchParams.current,
           total: pageTotal,
           showJumper: true,
-          showSizeChanger: true,
         }"
         @page-change="onPageChange"
+        @page-size-change="onPageSizeChange"
         class="data-table"
         :bordered="false"
       >
@@ -472,6 +472,14 @@ const onPageChange = (page: number) => {
   searchParams.value = {
     ...searchParams.value,
     current: page,
+  };
+};
+
+const onPageSizeChange = (pageSize: number) => {
+  searchParams.value = {
+    ...searchParams.value,
+    pageSize,
+    current: 1,
   };
 };
 

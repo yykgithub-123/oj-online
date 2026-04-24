@@ -169,7 +169,9 @@
             :page-size="searchParams.pageSize"
             :total="Number(total)"
             :show-total="true"
+            :show-jumper="true"
             @change="onPageChange"
+            @page-size-change="onPageSizeChange"
             size="small"
           />
         </div>
@@ -569,6 +571,14 @@ const onPageChange = (page: number) => {
   searchParams.value = {
     ...searchParams.value,
     current: page,
+  };
+};
+
+const onPageSizeChange = (pageSize: number) => {
+  searchParams.value = {
+    ...searchParams.value,
+    pageSize,
+    current: 1,
   };
 };
 
@@ -986,8 +996,6 @@ const goToMembership = () => {
 }
 
 .list-body {
-  max-height: 600px;
-  overflow-y: auto;
 }
 
 .question-item {

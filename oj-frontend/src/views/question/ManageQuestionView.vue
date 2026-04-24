@@ -23,46 +23,6 @@
       </div>
     </div>
 
-    <!-- 统计卡片 -->
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-icon total">
-          <icon-file />
-        </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ total }}</div>
-          <div class="stat-label">总题目数</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon submissions">
-          <icon-clock-circle />
-        </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ totalSubmissions }}</div>
-          <div class="stat-label">总提交数</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon accepted">
-          <icon-check-circle />
-        </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ totalAccepted }}</div>
-          <div class="stat-label">总通过数</div>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon rate">
-          <icon-trophy />
-        </div>
-        <div class="stat-content">
-          <div class="stat-value">{{ acceptanceRate }}%</div>
-          <div class="stat-label">通过率</div>
-        </div>
-      </div>
-    </div>
-
     <!-- 搜索筛选区域 -->
     <div class="filter-section">
       <div class="filter-card">
@@ -169,9 +129,9 @@
           current: searchParams.current,
           total,
           showJumper: true,
-          showSizeChanger: true,
         }"
         @page-change="onPageChange"
+        @page-size-change="onPageSizeChange"
         class="data-table"
         row-key="id"
         :bordered="false"
@@ -352,7 +312,7 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watchEffect, computed } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import {
   Page_Question_,
   Question,
@@ -364,10 +324,7 @@ import moment from "moment";
 import {
   IconSettings,
   IconPlus,
-  IconFile,
   IconClockCircle,
-  IconCheckCircle,
-  IconTrophy,
   IconFilter,
   IconSearch,
   IconRefresh,
@@ -397,14 +354,6 @@ const searchParams = ref({
   tags: [] as string[],
 });
 
-const totalSubmissions = ref(0);
-const totalAccepted = ref(0);
-
-const acceptanceRate = computed(() => {
-  if (totalSubmissions.value === 0) return 0;
-  return Math.round((totalAccepted.value / totalSubmissions.value) * 100);
-});
-
 const loadData = async () => {
   loading.value = true;
   try {
@@ -415,23 +364,19 @@ const loadData = async () => {
     if (params.tags.length === 0) params.tags = undefined;
 
     const res = await QuestionControllerService.listQuestionByPageUsingPost(params);
+    console.log("loadData params:", params, "response:", res);
     if (res.code === 0) {
       dataList.value = res.data.records;
-      total.value = res.data.total;
-      calculateStats();
+      total.value = Number(res.data.total);
     } else {
       message.error("加载失败，" + res.message);
     }
   } catch (error) {
+    console.error("loadData error:", error);
     message.error("网络错误，请稍后重试");
   } finally {
     loading.value = false;
   }
-};
-
-const calculateStats = () => {
-  totalSubmissions.value = dataList.value.reduce((sum, item) => sum + (item.submitNum || 0), 0);
-  totalAccepted.value = dataList.value.reduce((sum, item) => sum + (item.acceptedNum || 0), 0);
 };
 
 watchEffect(() => {
@@ -490,6 +435,10 @@ const columns = [
 
 const onPageChange = (page: number) => {
   searchParams.value = { ...searchParams.value, current: page };
+};
+
+const onPageSizeChange = (pageSize: number) => {
+  searchParams.value = { ...searchParams.value, pageSize, current: 1 };
 };
 
 const doSearch = () => {
@@ -670,70 +619,6 @@ const parseTestCases = (judgeCase: any) => {
 
 .create-btn:active {
   transform: translateY(0) scale(0.98);
-}
-
-/* 统计卡片 */
-.stats-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
-}
-
-.stat-card {
-  background: var(--bg-card);
-  border-radius: var(--radius-xl);
-  padding: var(--space-5);
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  border: 1px solid var(--border-default);
-  box-shadow: var(--shadow-sm);
-  transition: all var(--duration-fast);
-  animation: scaleIn 0.5s var(--ease-out) backwards;
-}
-
-.stat-card:nth-child(1) { animation-delay: calc(var(--stagger-delay) * 2); }
-.stat-card:nth-child(2) { animation-delay: calc(var(--stagger-delay) * 3); }
-.stat-card:nth-child(3) { animation-delay: calc(var(--stagger-delay) * 4); }
-.stat-card:nth-child(4) { animation-delay: calc(var(--stagger-delay) * 5); }
-
-.stat-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-}
-
-.stat-icon.total { background: var(--color-primary-50); color: var(--color-primary-500); }
-.stat-icon.submissions { background: var(--color-info-bg); color: var(--color-info); }
-.stat-icon.accepted { background: var(--color-success-bg); color: var(--color-success); }
-.stat-icon.rate { background: var(--color-warning-bg); color: var(--color-warning); }
-
-.stat-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-value {
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  margin-top: var(--space-1);
 }
 
 /* 筛选区域 */
@@ -1173,10 +1058,6 @@ const parseTestCases = (judgeCase: any) => {
 
 /* 响应式设计 */
 @media (max-width: 1000px) {
-  .stats-row {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .filter-content {
     flex-direction: column;
     align-items: stretch;
@@ -1209,14 +1090,6 @@ const parseTestCases = (judgeCase: any) => {
 
   .title-section {
     flex-direction: column;
-  }
-
-  .stats-row {
-    grid-template-columns: 1fr;
-  }
-
-  .stat-card {
-    padding: var(--space-4);
   }
 
   .table-header-bar {

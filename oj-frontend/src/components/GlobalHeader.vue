@@ -13,6 +13,7 @@
             <a-menu-item v-if="isLoggedIn" key="/question_submit">{{ isAdmin ? '浏览题目提交' : '我的提交' }}</a-menu-item>
             <a-menu-item v-if="isAdmin" key="/add/question">创建题目</a-menu-item>
             <a-menu-item v-if="isAdmin" key="/manage/question">管理题目</a-menu-item>
+            <a-menu-item v-if="isAdmin" key="/manage/user">管理用户</a-menu-item>
             <a-menu-item key="ai-link" class="ai-menu-item">亚克AI</a-menu-item>
           </a-menu>
         </nav>
