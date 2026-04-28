@@ -1,17 +1,10 @@
-# ==================== Java ====================
-# Compiled class file
+# ============================================================
+# .gitignore - OJ在线判题系统
+# 注意：本项目将公开，请勿提交任何敏感信息（密码、密钥等）
+# ============================================================
+
+# ==================== Java 编译产物 ====================
 *.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
 *.nar
@@ -20,7 +13,7 @@
 *.tar.gz
 *.rar
 
-# Maven
+# ==================== Maven ====================
 target/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -32,44 +25,52 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
-# Gradle
+# ==================== Gradle ====================
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 
-# Spring Boot
+# ==================== Spring Boot ====================
 *.pid
 
-# ==================== Node.js / Vue ====================
-# Dependencies
+# ==================== Node.js / Vue 前端 ====================
+# 依赖目录
 node_modules/
 .pnp
 .pnp.js
 
-# Testing
+# 测试覆盖率
 coverage/
 
-# Production
+# 构建产物
 dist/
 
-# Misc
-.DS_Store
-*.local
-
-# npm/yarn/pnpm
+# npm/yarn/pnpm 调试日志
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Environment
+# ==================== 敏感配置文件（公开仓库必须忽略）====================
+# 主配置文件（含数据库密码、Redis密码、微信密钥、COS密钥）
+application.yml
+# 生产/测试环境配置（含真实密码）
+application-prod.yml
+application-test.yml
+# 环境变量文件
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+# 密钥证书
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
 
-# ==================== IDE ====================
+# ==================== IDE 编辑器 ====================
 # IntelliJ IDEA
 .idea/
 *.iml
@@ -86,7 +87,7 @@ out/
 .project
 .metadata/
 
-# ==================== OS ====================
+# ==================== 操作系统生成文件 ====================
 # macOS
 .DS_Store
 .AppleDouble
@@ -101,52 +102,35 @@ Desktop.ini
 # Linux
 *~
 
-# ==================== Claude Code ====================
-.claude/
-
-# ==================== Logs & Temp ====================
+# ==================== 日志与临时文件 ====================
 logs/
 *.log
 *.tmp
 *.temp
+
+# ==================== AI 工具 ====================
+.claude/
+.windsurf/
 .playwright-mcp/
 
-# ==================== Sensitive Files ====================
-# Database configs with passwords
-application-prod.yml
-application-test.yml
-
-# Secrets
-*.pem
-*.key
-*.crt
-
-# Upload files (optional)
-# uploads/
-
-# ==================== Build Outputs ====================
-*.class
-*.jar
-*.war
-
-# ==================== Project Specific ====================
-# 开发流程文档
+# ==================== 项目特定目录 ====================
+# 开发流程文档（内部文档，不公开）
 开发流程/
 
-# 文档目录
+# 文档目录（内部文档）
 docs/
 
-# 脚本目录
+# 脚本目录（辅助脚本，无需提交）
 scripts/
 
-# 临时代码
-tmpcode/
+# 代码沙箱临时执行目录
+tmpCode/
 
-# SQL更新脚本（可选保留）
-# *.sql
+# ==================== 备份与快捷方式 ====================
+*.lnk
+*.bkp
 
-# ==================== Large Files ====================
-# 避免提交大文件
+# ==================== 大文件（避免仓库膨胀）====================
 *.docx
 *.doc
 *.pdf
