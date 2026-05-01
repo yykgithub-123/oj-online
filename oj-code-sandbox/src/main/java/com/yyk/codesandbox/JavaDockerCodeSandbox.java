@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -92,9 +93,21 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate {
 
         // 执行代码并收集结果
         List<ExecuteMessage> executeMessageList = new ArrayList<>();
-        for (String inputArgs : inputList) {
-            ExecuteMessage message = executeWithInput(dockerClient, containerId, inputArgs);
-            executeMessageList.add(message);
+        try {
+            for (String inputArgs : inputList) {
+                ExecuteMessage message = executeWithInput(dockerClient, containerId, inputArgs);
+                executeMessageList.add(message);
+            }
+        } finally {
+            // 清理容器：停止并删除，防止容器堆积
+            try {
+                dockerClient.stopContainerCmd(containerId).exec();
+            } catch (Exception ignored) {
+            }
+            try {
+                dockerClient.removeContainerCmd(containerId).withForce(true).exec();
+            } catch (Exception ignored) {
+            }
         }
 
         return executeMessageList;
@@ -129,10 +142,13 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate {
         hostConfig.withMemorySwap(0L);
         hostConfig.withCpuCount(1L);
         hostConfig.setBinds(new Bind(userCodeParentPath, new Volume("/app")));
+        // 挂载 tmpfs 到 /tmp，使只读根文件系统下 /tmp 仍可写（用于写入输入文件）
+        hostConfig.withTmpFs(Collections.singletonMap("/tmp", "rw,noexec,nosuid,size=64m"));
 
         CreateContainerResponse response = dockerClient.createContainerCmd(image)
                 .withHostConfig(hostConfig)
                 .withNetworkDisabled(true)
+                .withReadonlyRootfs(true)
                 .withAttachStdin(true)
                 .withAttachStderr(true)
                 .withAttachStdout(true)
