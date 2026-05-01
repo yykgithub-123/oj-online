@@ -4,12 +4,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.yyk.oj.annotation.AuthCheck;
 import com.yyk.oj.common.BaseResponse;
-import com.yyk.oj.common.DeleteRequest;
 import com.yyk.oj.common.ErrorCode;
 import com.yyk.oj.common.ResultUtils;
 import com.yyk.oj.constant.UserConstant;
 import com.yyk.oj.exception.BusinessException;
 import com.yyk.oj.exception.ThrowUtils;
+import org.springframework.cache.annotation.CacheEvict;
 import com.yyk.oj.mapper.UserMapper;
 import com.yyk.oj.model.dto.question.*;
 import com.yyk.oj.model.dto.questionsubmit.QuestionSubmitAddRequest;
@@ -87,6 +87,7 @@ public class QuestionController {
      * @return
      */
     @PostMapping("/add")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Long> addQuestion(@RequestBody QuestionAddRequest questionAddRequest, HttpServletRequest request) {
         if (questionAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -126,13 +127,13 @@ public class QuestionController {
      * @param request
      * @return
      */
-    @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteQuestion(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
-        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+    @DeleteMapping("/delete/{id}")
+    @CacheEvict(value = "questionVO", key = "#id")
+    public BaseResponse<Boolean> deleteQuestion(@PathVariable long id, HttpServletRequest request) {
+        if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User user = userService.getLoginUser(request);
-        long id = deleteRequest.getId();
         // 判断是否存在
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
@@ -150,7 +151,7 @@ public class QuestionController {
      * @param questionUpdateRequest
      * @return
      */
-    @PostMapping("/update")
+    @PutMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateQuestion(@RequestBody QuestionUpdateRequest questionUpdateRequest) {
         if (questionUpdateRequest == null || questionUpdateRequest.getId() <= 0) {
@@ -177,6 +178,8 @@ public class QuestionController {
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         boolean result = questionService.updateById(question);
+        // 清除题目缓存
+        questionService.clearQuestionCache(questionUpdateRequest.getId());
         return ResultUtils.success(result);
     }
 

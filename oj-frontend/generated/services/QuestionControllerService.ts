@@ -52,13 +52,15 @@ questionAddRequest: QuestionAddRequest,
      * @returns any Created
      * @throws ApiError
      */
-    public static deleteQuestionUsingPost(
-deleteRequest: DeleteRequest,
+    public static deleteQuestionUsingDelete(
+id: number,
 ): CancelablePromise<BaseResponse_boolean_ | any> {
         return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/question/delete',
-            body: deleteRequest,
+            method: 'DELETE',
+            url: '/api/question/delete/{id}',
+            path: {
+                'id': id,
+            },
             errors: {
                 401: `Unauthorized`,
                 403: `Forbidden`,
@@ -252,11 +254,11 @@ questionSubmitQueryRequest: QuestionSubmitQueryRequest,
      * @returns any Created
      * @throws ApiError
      */
-    public static updateQuestionUsingPost(
+    public static updateQuestionUsingPut(
 questionUpdateRequest: QuestionUpdateRequest,
 ): CancelablePromise<BaseResponse_boolean_ | any> {
         return __request(OpenAPI, {
-            method: 'POST',
+            method: 'PUT',
             url: '/api/question/update',
             body: questionUpdateRequest,
             errors: {

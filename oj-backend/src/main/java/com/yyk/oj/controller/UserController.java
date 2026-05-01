@@ -3,7 +3,6 @@ package com.yyk.oj.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yyk.oj.annotation.AuthCheck;
 import com.yyk.oj.common.BaseResponse;
-import com.yyk.oj.common.DeleteRequest;
 import com.yyk.oj.common.ErrorCode;
 import com.yyk.oj.common.ResultUtils;
 import com.yyk.oj.config.WxOpenConfig;
@@ -188,17 +187,17 @@ public class UserController {
     /**
      * 删除用户
      *
-     * @param deleteRequest
+     * @param id
      * @param request
      * @return
      */
-    @PostMapping("/delete")
+    @DeleteMapping("/delete/{id}")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
-        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+    public BaseResponse<Boolean> deleteUser(@PathVariable long id, HttpServletRequest request) {
+        if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean b = userService.removeById(deleteRequest.getId());
+        boolean b = userService.removeById(id);
         return ResultUtils.success(b);
     }
 
@@ -209,7 +208,7 @@ public class UserController {
      * @param request
      * @return
      */
-    @PostMapping("/update")
+    @PutMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest,
                                             HttpServletRequest request) {
@@ -307,7 +306,7 @@ public class UserController {
      * @param request
      * @return
      */
-    @PostMapping("/update/my")
+    @PutMapping("/update/my")
     public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest,
                                               HttpServletRequest request) {
         if (userUpdateMyRequest == null) {

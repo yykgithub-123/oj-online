@@ -1,0 +1,86 @@
+# 公共配置文件模板
+# 使用方法：复制本文件为 application.yml，然后替换其中的占位符为真实值
+# cp application-example.yml application.yml
+
+spring:
+  application:
+    name: yykoj-backend
+  # 默认 dev 环境
+  profiles:
+    active: dev
+  # 支持 swagger3
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  # session 配置
+  session:
+    store-type: redis
+    # 30 天过期
+    timeout: 2592000
+  # 数据库配置（需替换为真实值）
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/yykoj
+    username: <你的数据库用户名>
+    password: <你的数据库密码>
+  # Redis 配置（需替换为真实值）
+  redis:
+    database: 1
+    host: localhost
+    port: 6379
+    timeout: 5000
+    password: <你的Redis密码>
+  # 缓存配置
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000  # 默认过期时间1小时（毫秒）
+  # 文件上传
+  servlet:
+    multipart:
+      # 大小限制
+      max-file-size: 10MB
+server:
+  address: 0.0.0.0
+  port: 8821
+  servlet:
+    context-path: /api
+    # cookie 30 天过期
+    session:
+      cookie:
+        max-age: 2592000
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+  global-config:
+    db-config:
+      logic-delete-field: isDelete
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+# 微信相关（需替换为真实值）
+wx:
+  mp:
+    token: <你的微信公众号token>
+    aesKey: <你的微信公众号aesKey>
+    appId: <你的微信公众号appId>
+    secret: <你的微信公众号secret>
+    config-storage:
+      http-client-type: HttpClient
+      key-prefix: wx
+      redis:
+        host: 127.0.0.1
+        port: 6379
+      type: Memory
+  open:
+    appId: <你的微信开放平台appId>
+    appSecret: <你的微信开放平台appSecret>
+# 对象存储（需替换为真实值）
+cos:
+  client:
+    accessKey: <你的COS accessKey>
+    secretKey: <你的COS secretKey>
+    region: <你的COS region>
+    bucket: <你的COS bucket>
+# 代码沙箱配置
+codesandbox:
+  type: remote

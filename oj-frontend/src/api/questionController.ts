@@ -32,17 +32,13 @@ export async function aiGenerateQuestionUsingPost(
   });
 }
 
-/** deleteQuestion POST /api/question/delete */
-export async function deleteQuestionUsingPost(
-  body: API.DeleteRequest,
+/** deleteQuestion DELETE /api/question/delete/{id} */
+export async function deleteQuestionUsingDelete(
+  id: number,
   options?: { [key: string]: any },
 ) {
-  return request<API.BaseResponseBoolean_>('/api/question/delete', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
+  return request<API.BaseResponseBoolean_>(`/api/question/delete/${id}`, {
+    method: 'DELETE',
     ...(options || {}),
   });
 }
@@ -122,13 +118,13 @@ export async function listMyQuestionVoByPageUsingPost(
   });
 }
 
-/** updateQuestion POST /api/question/update */
-export async function updateQuestionUsingPost(
+/** updateQuestion PUT /api/question/update */
+export async function updateQuestionUsingPut(
   body: API.QuestionUpdateRequest,
   options?: { [key: string]: any },
 ) {
   return request<API.BaseResponseBoolean_>('/api/question/update', {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },

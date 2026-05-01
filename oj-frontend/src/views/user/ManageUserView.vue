@@ -399,7 +399,7 @@ const showEditModal = (record: any) => {
 const handleEditOk = async () => {
   editLoading.value = true;
   try {
-    const res = await axios.post("/api/user/update", editForm.value);
+    const res = await axios.put("/api/user/update", editForm.value);
     if (res.data.code === 0) {
       message.success("用户信息更新成功");
       editVisible.value = false;
@@ -418,7 +418,7 @@ const handleEditOk = async () => {
 const toggleBan = async (record: any) => {
   const newRole = record.userRole === "ban" ? "user" : "ban";
   try {
-    const res = await axios.post("/api/user/update", {
+    const res = await axios.put("/api/user/update", {
       id: record.id,
       userRole: newRole,
     });
@@ -436,7 +436,7 @@ const toggleBan = async (record: any) => {
 
 const doDelete = async (record: any) => {
   try {
-    const res = await axios.post("/api/user/delete", { id: record.id });
+    const res = await axios.delete(`/api/user/delete/${record.id}`);
     if (res.data.code === 0) {
       message.success("用户已删除");
       loadData();

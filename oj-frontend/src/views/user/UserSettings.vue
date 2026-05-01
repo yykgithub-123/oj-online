@@ -218,7 +218,7 @@ const loadUserSettings = () => {
 const updateAccount = async () => {
   accountLoading.value = true;
   try {
-    const res = await axios.post("/api/user/update/my", {
+    const res = await axios.put("/api/user/update/my", {
       userName: accountForm.value.userName,
       userProfile: accountForm.value.userProfile,
     });

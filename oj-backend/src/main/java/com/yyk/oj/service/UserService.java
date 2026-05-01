@@ -142,4 +142,11 @@ public interface UserService extends IService<User> {
      */
     UserStatsVO getUserStats(Long userId);
 
+    /**
+     * 清除用户统计缓存
+     *
+     * @param userId 用户ID
+     */
+    void clearUserStatsCache(Long userId);
+
 }

@@ -397,7 +397,7 @@ const doSubmit = async () => {
   submitting.value = true;
   try {
     if (updatePage) {
-      const res = await QuestionControllerService.updateQuestionUsingPost(form.value);
+      const res = await QuestionControllerService.updateQuestionUsingPut(form.value);
       if (res.code === 0) {
         message.success("更新成功");
         router.push('/manage/question/');

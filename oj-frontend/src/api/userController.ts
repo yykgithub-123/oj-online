@@ -14,17 +14,13 @@ export async function addUserUsingPost(body: API.UserAddRequest, options?: { [ke
   });
 }
 
-/** deleteUser POST /api/user/delete */
-export async function deleteUserUsingPost(
-  body: API.DeleteRequest,
+/** deleteUser DELETE /api/user/delete/{id} */
+export async function deleteUserUsingDelete(
+  id: number,
   options?: { [key: string]: any },
 ) {
-  return request<API.BaseResponseBoolean_>('/api/user/delete', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
+  return request<API.BaseResponseBoolean_>(`/api/user/delete/${id}`, {
+    method: 'DELETE',
     ...(options || {}),
   });
 }
@@ -135,13 +131,13 @@ export async function userRegisterUsingPost(
   });
 }
 
-/** updateUser POST /api/user/update */
-export async function updateUserUsingPost(
+/** updateUser PUT /api/user/update */
+export async function updateUserUsingPut(
   body: API.UserUpdateRequest,
   options?: { [key: string]: any },
 ) {
   return request<API.BaseResponseBoolean_>('/api/user/update', {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -150,13 +146,13 @@ export async function updateUserUsingPost(
   });
 }
 
-/** updateMyUser POST /api/user/update/my */
-export async function updateMyUserUsingPost(
+/** updateMyUser PUT /api/user/update/my */
+export async function updateMyUserUsingPut(
   body: API.UserUpdateMyRequest,
   options?: { [key: string]: any },
 ) {
   return request<API.BaseResponseBoolean_>('/api/user/update/my', {
-    method: 'POST',
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },

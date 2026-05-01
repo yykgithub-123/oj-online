@@ -22,6 +22,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -147,6 +149,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
      * @return
      */
     @Override
+    @Cacheable(value = "questionVO", key = "#question.id")
     public QuestionVO getQuestionVO(Question question, HttpServletRequest request) {
         QuestionVO questionVO = QuestionVO.objToVo(question);
         // 1. 关联查询用户信息
@@ -249,6 +252,12 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         
         question.setDifficulty(difficulty);
         return this.updateById(question);
+    }
+
+    @Override
+    @CacheEvict(value = "questionVO", key = "#questionId")
+    public void clearQuestionCache(Long questionId) {
+        // 仅用于清除缓存，无需额外操作
     }
 }
 

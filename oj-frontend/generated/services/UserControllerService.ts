@@ -52,13 +52,15 @@ userAddRequest: UserAddRequest,
      * @returns any Created
      * @throws ApiError
      */
-    public static deleteUserUsingPost(
-deleteRequest: DeleteRequest,
+    public static deleteUserUsingDelete(
+id: number,
 ): CancelablePromise<BaseResponse_boolean_ | any> {
         return __request(OpenAPI, {
-            method: 'POST',
-            url: '/api/user/delete',
-            body: deleteRequest,
+            method: 'DELETE',
+            url: '/api/user/delete/{id}',
+            path: {
+                'id': id,
+            },
             errors: {
                 401: `Unauthorized`,
                 403: `Forbidden`,
@@ -266,11 +268,11 @@ userRegisterRequest: UserRegisterRequest,
      * @returns any Created
      * @throws ApiError
      */
-    public static updateUserUsingPost(
+    public static updateUserUsingPut(
 userUpdateRequest: UserUpdateRequest,
 ): CancelablePromise<BaseResponse_boolean_ | any> {
         return __request(OpenAPI, {
-            method: 'POST',
+            method: 'PUT',
             url: '/api/user/update',
             body: userUpdateRequest,
             errors: {
@@ -288,11 +290,11 @@ userUpdateRequest: UserUpdateRequest,
      * @returns any Created
      * @throws ApiError
      */
-    public static updateMyUserUsingPost(
+    public static updateMyUserUsingPut(
 userUpdateMyRequest: UserUpdateMyRequest,
 ): CancelablePromise<BaseResponse_boolean_ | any> {
         return __request(OpenAPI, {
-            method: 'POST',
+            method: 'PUT',
             url: '/api/user/update/my',
             body: userUpdateMyRequest,
             errors: {

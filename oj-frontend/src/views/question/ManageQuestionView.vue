@@ -456,7 +456,7 @@ const resetSearch = () => {
 
 const doDelete = async (question: Question) => {
   try {
-    const res = await QuestionControllerService.deleteQuestionUsingPost({ id: question.id });
+    const res = await QuestionControllerService.deleteQuestionUsingDelete(question.id!);
     if (res.code === 0) {
       message.success("删除成功");
       loadData();
