@@ -57,23 +57,6 @@ mybatis-plus:
       logic-delete-field: isDelete
       logic-delete-value: 1
       logic-not-delete-value: 0
-# 微信相关（需替换为真实值）
-wx:
-  mp:
-    token: <你的微信公众号token>
-    aesKey: <你的微信公众号aesKey>
-    appId: <你的微信公众号appId>
-    secret: <你的微信公众号secret>
-    config-storage:
-      http-client-type: HttpClient
-      key-prefix: wx
-      redis:
-        host: 127.0.0.1
-        port: 6379
-      type: Memory
-  open:
-    appId: <你的微信开放平台appId>
-    appSecret: <你的微信开放平台appSecret>
 # 对象存储（需替换为真实值）
 cos:
   client:

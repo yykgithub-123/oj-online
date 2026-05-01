@@ -35,7 +35,6 @@
         <easyexcel.version>3.1.1</easyexcel.version>
         <knife4j.version>3.0.3</knife4j.version>
         <cos.version>5.6.89</cos.version>
-        <wx-java.version>4.4.0</wx-java.version>
     </properties>
 
     <dependencyManagement>
@@ -75,12 +74,6 @@
                 <groupId>com.qcloud</groupId>
                 <artifactId>cos_api</artifactId>
                 <version>${cos.version}</version>
-            </dependency>
-            <!-- 微信小程序 -->
-            <dependency>
-                <groupId>com.github.binarywang</groupId>
-                <artifactId>wx-java-mp-spring-boot-starter</artifactId>
-                <version>${wx-java.version}</version>
             </dependency>
             <!-- Docker Java -->
             <dependency>
