@@ -225,6 +225,7 @@ import {
   QuestionSubmitAddRequest,
   QuestionVO,
 } from "../../../generated";
+import { doQuestionSubmit, listQuestionSubmitByPage } from "@/api/questionSubmitController";
 
 interface Props {
   id: string;
@@ -327,21 +328,21 @@ const doSubmit = async () => {
 
   submitting.value = true;
   try {
-    const res = await QuestionControllerService.doQuestionSubmitUsingPost({
+    const res = await doQuestionSubmit({
       ...form.value,
       questionId: question.value.id,
     });
-    if (res.code === 0) {
+    if (res.data.code === 0) {
       message.success("提交成功，正在判题...");
       // 自动切换到记录 tab
       activeTab.value = "records";
       // 刷新一次
       await loadUserSubmitRecords();
       // 开始轮询，等待判题完成
-      const submitId = (res.data as unknown) as number;
+      const submitId = (res.data.data as unknown) as number;
       pollJudgeResult(submitId);
     } else {
-      message.error("提交失败," + res.message);
+      message.error("提交失败," + res.data.message);
     }
   } catch (error) {
     message.error("提交异常，请稍后重试");
@@ -420,17 +421,17 @@ const loadUserSubmitRecords = async () => {
   }
 
   try {
-    const res = await QuestionControllerService.listQuestionSubmitByPageUsingPost({
+    const res = await listQuestionSubmitByPage({
       userId: loginUser.id,
       questionId: Number(questionId),
       current: 1,
       pageSize: 20,
     });
 
-    if (res.code === 0) {
-      userSubmitRecords.value = res.data?.records || [];
+    if (res.data.code === 0) {
+      userSubmitRecords.value = res.data.data?.records || [];
     } else {
-      console.error("加载提交记录失败:", res.message);
+      console.error("加载提交记录失败:", res.data.message);
     }
   } catch (error) {
     console.error("加载提交记录失败:", error);

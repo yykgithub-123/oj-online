@@ -77,10 +77,19 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate {
                 .withDockerHttpClient(httpClient)
                 .build();
 
-        // 拉取镜像
+        // 拉取镜像（仅在本地不存在时拉取）
         String image = "eclipse-temurin:17-jdk-alpine";
         if (FIRST_INIT) {
-            pullImage(dockerClient, image);
+            List<Image> images = dockerClient.listImagesCmd().exec();
+            boolean imageExists = images.stream()
+                    .anyMatch(img -> img.getRepoTags() != null
+                            && Arrays.asList(img.getRepoTags()).contains(image));
+            if (imageExists) {
+                System.out.println("镜像已存在，跳过拉取：" + image);
+            } else {
+                System.out.println("本地无镜像，开始拉取：" + image);
+                pullImage(dockerClient, image);
+            }
         }
 
         System.out.println("镜像准备完成");

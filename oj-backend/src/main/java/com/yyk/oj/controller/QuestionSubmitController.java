@@ -107,6 +107,41 @@ public class QuestionSubmitController {
 
 
     /**
+     * 获取提交统计信息（管理员看全部，普通用户看自己的）
+     */
+    @GetMapping("/stats")
+    public BaseResponse<Map<String, Object>> getSubmitStats(HttpServletRequest request) {
+        final User loginUser = userService.getLoginUser(request);
+        boolean isAdmin = userService.isAdmin(loginUser);
+        Long userId = isAdmin ? null : loginUser.getId();
+
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<QuestionSubmit> totalQuery =
+                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        totalQuery.eq("isDelete", false);
+        if (userId != null) totalQuery.eq("userId", userId);
+        long totalCount = questionSubmitService.count(totalQuery);
+
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<QuestionSubmit> successQuery =
+                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        successQuery.eq("isDelete", false).eq("status", 2);
+        if (userId != null) successQuery.eq("userId", userId);
+        long successCount = questionSubmitService.count(successQuery);
+
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<QuestionSubmit> failQuery =
+                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        failQuery.eq("isDelete", false).eq("status", 3);
+        if (userId != null) failQuery.eq("userId", userId);
+        long failCount = questionSubmitService.count(failQuery);
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("total", totalCount);
+        stats.put("successCount", successCount);
+        stats.put("failCount", failCount);
+        stats.put("successRate", totalCount > 0 ? Math.round((double) successCount / totalCount * 100) : 0);
+        return ResultUtils.success(stats);
+    }
+
+    /**
      * 删除提交记录（仅管理员可用）
      *
      * @param id 提交记录ID

@@ -145,7 +145,7 @@ import {
   IconTrophy,
   IconIdcard,
 } from '@arco-design/web-vue/es/icon';
-import axios from "axios";
+import { getSubmitStats } from "@/api/questionSubmitController";
 
 const store = useStore();
 
@@ -235,7 +235,7 @@ const handleAvatarChange = async (event: Event) => {
 
 const loadSubmitStats = async () => {
   try {
-    const res = await axios.get("/api/question/question_submit/stats");
+    const res = await getSubmitStats();
     if (res.data.code === 0) {
       submitStats.value = res.data.data;
     }

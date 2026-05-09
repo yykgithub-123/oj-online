@@ -288,12 +288,8 @@
 
 <script setup lang="ts">
 import { onMounted, ref, watchEffect } from "vue";
-import {
-  Question,
-  QuestionControllerService,
-  QuestionSubmitQueryRequest,
-} from "../../../generated";
-import axios from "axios";
+import { Question, QuestionSubmitQueryRequest } from "../../../generated";
+import { listQuestionSubmitByPage, getSubmitStats } from "@/api/questionSubmitController";
 import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import moment from "moment";
@@ -336,7 +332,7 @@ const successRate = ref(0);
 
 const loadStats = async () => {
   try {
-    const res = await axios.get("/api/question/question_submit/stats");
+    const res = await getSubmitStats();
     if (res.data.code === 0) {
       const stats = res.data.data;
       total.value = stats.total;
@@ -362,12 +358,12 @@ const loadData = async () => {
       params.questionId = parseInt(params.questionId);
     }
 
-    const res = await QuestionControllerService.listQuestionSubmitByPageUsingPost(params);
-    if (res.code === 0) {
-      dataList.value = res.data.records;
-      pageTotal.value = res.data.total;
+    const res = await listQuestionSubmitByPage(params);
+    if (res.data.code === 0) {
+      dataList.value = res.data.data.records;
+      pageTotal.value = res.data.data.total;
     } else {
-      message.error("加载失败，" + res.message);
+      message.error("加载失败，" + res.data.message);
     }
   } catch (error) {
     console.error('加载数据错误:', error);
