@@ -43,15 +43,15 @@ public class AuthInterceptor {
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
         // 当前登录用户
         User loginUser = userService.getLoginUser(request);
+        String userRole = loginUser.getUserRole();
+        // 被封号的用户，直接拒绝一切操作
+        if (UserRoleEnum.BAN.getValue().equals(userRole)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
         // 必须有该权限才通过
         if (StringUtils.isNotBlank(mustRole)) {
             UserRoleEnum mustUserRoleEnum = UserRoleEnum.getEnumByValue(mustRole);
             if (mustUserRoleEnum == null) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-            }
-            String userRole = loginUser.getUserRole();
-            // 如果被封号，直接拒绝
-            if (UserRoleEnum.BAN.equals(mustUserRoleEnum)) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
             // 必须有管理员权限

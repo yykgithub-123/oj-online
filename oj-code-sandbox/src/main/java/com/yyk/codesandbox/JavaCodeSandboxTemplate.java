@@ -36,22 +36,23 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
 //        1. 把用户的代码保存为文件
         File userCodeFile = saveCodeToFile(code);
 
+        try {
 //        2. 编译代码，得到 class 文件
-        ExecuteMessage compileFileExecuteMessage = compileFile(userCodeFile);
-        System.out.println(compileFileExecuteMessage);
+            ExecuteMessage compileFileExecuteMessage = compileFile(userCodeFile);
+            System.out.println(compileFileExecuteMessage);
 
-        // 3. 执行代码，得到输出结果
-        List<ExecuteMessage> executeMessageList = runFile(userCodeFile, inputList);
+            // 3. 执行代码，得到输出结果
+            List<ExecuteMessage> executeMessageList = runFile(userCodeFile, inputList);
 
 //        4. 收集整理输出结果
-        ExecuteCodeResponse outputResponse = getOutputResponse(executeMessageList);
-
+            return getOutputResponse(executeMessageList);
+        } finally {
 //        5. 文件清理
-        boolean b = deleteFile(userCodeFile);
-        if (!b) {
-            log.error("deleteFile error, userCodeFilePath = {}", userCodeFile.getAbsolutePath());
+            boolean b = deleteFile(userCodeFile);
+            if (!b) {
+                log.error("deleteFile error, userCodeFilePath = {}", userCodeFile.getAbsolutePath());
+            }
         }
-        return outputResponse;
     }
 
 
@@ -62,6 +63,10 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
      */
     public File saveCodeToFile(String code) {
         String userDir = System.getProperty("user.dir");
+        // 确保 tmpCode 始终在 oj-code-sandbox 模块目录下，不受启动目录影响
+        if (!userDir.endsWith("oj-code-sandbox")) {
+            userDir = userDir + File.separator + "oj-code-sandbox";
+        }
         String globalCodePathName = userDir + File.separator + GLOBAL_CODE_DIR_NAME;
         // 判断全局代码目录是否存在，没有则新建
         if (!FileUtil.exist(globalCodePathName)) {

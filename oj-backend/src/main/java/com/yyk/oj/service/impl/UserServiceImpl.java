@@ -23,9 +23,12 @@ import com.yyk.oj.model.vo.UserVO;
 import com.yyk.oj.service.UserService;
 import com.yyk.oj.utils.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
@@ -34,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.yyk.oj.constant.UserConstant.USER_LOGIN_STATE;
@@ -48,6 +52,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private QuestionSubmitMapper questionSubmitMapper;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    /** 排行榜ZSet的key */
+    private static final String RANKING_TOTAL_KEY = "ranking:total";
+    private static final String RANKING_WEEKLY_KEY = "ranking:weekly";
 
     /**
      * 盐值，混淆密码
@@ -114,43 +125,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = this.baseMapper.selectOne(queryWrapper);
         // 用户不存在
         if (user == null) {
-            log.info("user login failed, userAccount cannot match userPassword");
+            log.warn("[用户登录] 登录失败, 账号={}", userAccount);
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
+        }
+        // 账号被封禁
+        if (UserRoleEnum.BAN.getValue().equals(user.getUserRole())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "账号已被封禁，无法登录");
         }
         // 3. 记录用户的登录态
         request.getSession().setAttribute(USER_LOGIN_STATE, user);
         return this.getLoginUserVO(user);
     }
 
-    @Override
-    public LoginUserVO userLoginByMpOpen(WxOAuth2UserInfo wxOAuth2UserInfo, HttpServletRequest request) {
-        String unionId = wxOAuth2UserInfo.getUnionId();
-        String mpOpenId = wxOAuth2UserInfo.getOpenid();
-        // 单机锁
-        synchronized (unionId.intern()) {
-            // 查询用户是否已存在
-            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("unionId", unionId);
-            User user = this.getOne(queryWrapper);
-            // 被封号，禁止登录
-            if (user != null && UserRoleEnum.BAN.getValue().equals(user.getUserRole())) {
-                throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "该用户已被封，禁止登录");
-            }
-            // 用户不存在则创建
-            if (user == null) {
-                user = new User();
-                user.setUserAvatar(wxOAuth2UserInfo.getHeadImgUrl());
-                user.setUserName(wxOAuth2UserInfo.getNickname());
-                boolean result = this.save(user);
-                if (!result) {
-                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败");
-                }
-            }
-            // 记录用户的登录态
-            request.getSession().setAttribute(USER_LOGIN_STATE, user);
-            return getLoginUserVO(user);
-        }
-    }
 
     /**
      * 获取当前登录用户
@@ -171,6 +157,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         currentUser = this.getById(userId);
         if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        // 被封禁的用户，拒绝一切操作
+        if (UserRoleEnum.BAN.getValue().equals(currentUser.getUserRole())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "账号已被封禁");
         }
         return currentUser;
     }
@@ -262,8 +252,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
         }
         Long id = userQueryRequest.getId();
-        String unionId = userQueryRequest.getUnionId();
-        String mpOpenId = userQueryRequest.getMpOpenId();
         String userName = userQueryRequest.getUserName();
         String userProfile = userQueryRequest.getUserProfile();
         String userRole = userQueryRequest.getUserRole();
@@ -271,8 +259,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         String sortOrder = userQueryRequest.getSortOrder();
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(id != null, "id", id);
-        queryWrapper.eq(StringUtils.isNotBlank(unionId), "unionId", unionId);
-        queryWrapper.eq(StringUtils.isNotBlank(mpOpenId), "mpOpenId", mpOpenId);
         queryWrapper.eq(StringUtils.isNotBlank(userRole), "userRole", userRole);
         queryWrapper.like(StringUtils.isNotBlank(userProfile), "userProfile", userProfile);
         queryWrapper.like(StringUtils.isNotBlank(userName), "userName", userName);
@@ -283,18 +269,73 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public List<UserStatsVO> getUserRankingList(int limit) {
-        // 1. 获取所有用户
+        // 1. 尝试从Redis ZSet获取排行
+        List<UserStatsVO> result = getRankingFromZSet(RANKING_TOTAL_KEY, limit);
+        if (result != null) {
+            return result;
+        }
+        // 2. ZSet为空，从数据库加载并写入ZSet
+        result = loadAndCacheRanking(RANKING_TOTAL_KEY, limit, false);
+        return result;
+    }
+
+    @Override
+    public List<UserStatsVO> getWeeklyUserRankingList(int limit) {
+        // 1. 尝试从Redis ZSet获取排行
+        List<UserStatsVO> result = getRankingFromZSet(RANKING_WEEKLY_KEY, limit);
+        if (result != null) {
+            return result;
+        }
+        // 2. ZSet为空，从数据库加载并写入ZSet
+        result = loadAndCacheRanking(RANKING_WEEKLY_KEY, limit, true);
+        return result;
+    }
+
+    /**
+     * 从Redis ZSet获取排行榜
+     */
+    private List<UserStatsVO> getRankingFromZSet(String key, int limit) {
+        Long size = stringRedisTemplate.opsForZSet().size(key);
+        if (size == null || size == 0) {
+            return null;
+        }
+        // 按分数降序获取Top N
+        Set<ZSetOperations.TypedTuple<String>> tuples = stringRedisTemplate.opsForZSet()
+                .reverseRangeWithScores(key, 0, limit - 1);
+        if (tuples == null || tuples.isEmpty()) {
+            return null;
+        }
+        List<UserStatsVO> result = new ArrayList<>();
+        int rank = 1;
+        for (ZSetOperations.TypedTuple<String> tuple : tuples) {
+            String userIdStr = tuple.getValue();
+            if (userIdStr == null) {
+                continue;
+            }
+            Long userId = Long.valueOf(userIdStr);
+            UserStatsVO stats = getUserStats(userId);
+            if (stats == null) {
+                continue;
+            }
+            stats.setRank(rank++);
+            result.add(stats);
+        }
+        return result;
+    }
+
+    /**
+     * 从数据库加载排行榜并写入Redis ZSet
+     */
+    private List<UserStatsVO> loadAndCacheRanking(String key, int limit, boolean weekly) {
         List<User> userList = this.list();
         if (CollUtil.isEmpty(userList)) {
             return new ArrayList<>();
         }
-        
-        // 2. 并行获取每个用户的统计信息
+        // 并行获取每个用户的统计信息
         List<UserStatsVO> userStatsList = userList.parallelStream()
                 .map(user -> {
                     try {
                         UserStatsVO stats = getUserStats(user.getId());
-                        // 确保返回非空对象，避免空指针
                         if (stats == null) {
                             stats = new UserStatsVO();
                             stats.setUserId(user.getId());
@@ -307,81 +348,46 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         }
                         return stats;
                     } catch (Exception e) {
-                        log.error("获取用户统计信息失败: userId={}", user.getId(), e);
+                        log.error("[用户统计] 获取失败, 用户编号={}", user.getId(), e);
                         return null;
                     }
                 })
                 .filter(stats -> stats != null)
                 .collect(Collectors.toList());
-        
-        // 3. 排序：优先按解题数降序，其次按通过率降序
-        userStatsList.sort((a, b) -> {
-            int solvedCompare = b.getTotalSolved().compareTo(a.getTotalSolved());
-            if (solvedCompare != 0) {
-                return solvedCompare;
+
+        // 写入Redis ZSet
+        for (UserStatsVO stats : userStatsList) {
+            int solved = weekly ? (stats.getWeeklySolved() == null ? 0 : stats.getWeeklySolved()) : (stats.getTotalSolved() == null ? 0 : stats.getTotalSolved());
+            if (solved > 0) {
+                stringRedisTemplate.opsForZSet().add(key, String.valueOf(stats.getUserId()), solved);
             }
-            return b.getAcceptanceRate().compareTo(a.getAcceptanceRate());
-        });
-        
-        // 4. 截取前N名并设置排名
-        List<UserStatsVO> result = userStatsList.stream()
-                .limit(limit)
-                .collect(Collectors.toList());
-                
-        for (int i = 0; i < result.size(); i++) {
-            result.get(i).setRank(i + 1);
         }
-        
-        return result;
-    }
+        // 设置过期时间：总榜1小时，周榜10分钟
+        stringRedisTemplate.expire(key, weekly ? 10 : 60, java.util.concurrent.TimeUnit.MINUTES);
 
-    @Override
-    public List<UserStatsVO> getWeeklyUserRankingList(int limit) {
-        // 1. 获取所有用户
-        List<User> userList = this.list();
-        if (CollUtil.isEmpty(userList)) {
-            return new ArrayList<>();
-        }
-
-        // 2. 并行获取每个用户的统计信息
-        List<UserStatsVO> userStatsList = userList.parallelStream()
-                .map(user -> {
-                    try {
-                        return getUserStats(user.getId());
-                    } catch (Exception e) {
-                        log.error("获取用户统计信息失败: userId={}", user.getId(), e);
-                        return null;
-                    }
-                })
-                .filter(stats -> stats != null)
-                .collect(Collectors.toList());
-
-        // 3. 排序：优先按周解题数降序，其次按通过率降序
+        // 排序
         userStatsList.sort((a, b) -> {
-            // 注意这里要判空，防止 getWeeklySolved 为 null
-            int solvedA = a.getWeeklySolved() == null ? 0 : a.getWeeklySolved();
-            int solvedB = b.getWeeklySolved() == null ? 0 : b.getWeeklySolved();
+            int solvedA = weekly ? (a.getWeeklySolved() == null ? 0 : a.getWeeklySolved()) : (a.getTotalSolved() == null ? 0 : a.getTotalSolved());
+            int solvedB = weekly ? (b.getWeeklySolved() == null ? 0 : b.getWeeklySolved()) : (b.getTotalSolved() == null ? 0 : b.getTotalSolved());
             int solvedCompare = Integer.compare(solvedB, solvedA);
-            
             if (solvedCompare != 0) {
                 return solvedCompare;
             }
             return b.getAcceptanceRate().compareTo(a.getAcceptanceRate());
         });
 
-        // 4. 截取前N名并设置排名
+        // 截取前N名并设置排名
         List<UserStatsVO> result = userStatsList.stream()
                 .limit(limit)
                 .collect(Collectors.toList());
-
         for (int i = 0; i < result.size(); i++) {
             result.get(i).setRank(i + 1);
         }
-
         return result;
     }
 
     @Override
+    @Cacheable(value = "userStats", key = "#userId")
     public UserStatsVO getUserStats(Long userId) {
         User user = this.getById(userId);
         if (user == null) {
@@ -443,7 +449,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                         }
                         return isAccepted;
                     } catch (Exception e) {
-                        log.error("解析判题信息失败, ID: {}, Error: {}", submit.getId(), e.getMessage());
+                        log.error("[用户统计] 解析判题信息失败, 提交编号={}, 原因={}", submit.getId(), e.getMessage());
                         return false;
                     }
                 })
@@ -479,5 +485,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         return userStats;
+    }
+
+    @Override
+    @CacheEvict(value = "userStats", key = "#userId")
+    public void clearUserStatsCache(Long userId) {
+        // 仅用于清除缓存，无需额外操作
     }
 }

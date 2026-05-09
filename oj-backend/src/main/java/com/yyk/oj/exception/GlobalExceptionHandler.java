@@ -17,13 +17,16 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public BaseResponse<?> businessExceptionHandler(BusinessException e) {
-        log.error("BusinessException", e);
+        // "未登录"已在 LogInterceptor 中以 DEBUG 处理，此处不再重复打印
+        if (e.getCode() != 40100) {
+            log.warn("[业务异常] 错误码={}, 原因={}", e.getCode(), e.getMessage());
+        }
         return ResultUtils.error(e.getCode(), e.getMessage());
     }
 
     @ExceptionHandler(RuntimeException.class)
     public BaseResponse<?> runtimeExceptionHandler(RuntimeException e) {
-        log.error("RuntimeException", e);
+        log.error("[系统异常] 未预期错误, 原因={}", e.getMessage(), e);
         return ResultUtils.error(ErrorCode.SYSTEM_ERROR, "系统错误");
     }
 }

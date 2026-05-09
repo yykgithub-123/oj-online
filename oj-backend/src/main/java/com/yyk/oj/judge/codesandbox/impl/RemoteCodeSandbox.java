@@ -7,11 +7,13 @@ import com.yyk.oj.exception.BusinessException;
 import com.yyk.oj.judge.codesandbox.CodeSandbox;
 import com.yyk.oj.judge.codesandbox.model.ExecuteCodeRequest;
 import com.yyk.oj.judge.codesandbox.model.ExecuteCodeResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 /**
  * 远程代码沙箱（实际调用接口的沙箱）
  */
+@Slf4j
 public class RemoteCodeSandbox implements CodeSandbox {
 
     // 定义鉴权请求头和密钥
@@ -22,7 +24,7 @@ public class RemoteCodeSandbox implements CodeSandbox {
 
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
-        System.out.println("远程代码沙箱");
+        log.info("[代码沙箱] 调用远程沙箱, 语言={}", executeCodeRequest.getLanguage());
         String url = "http://localhost:8090/executeCode";
         String json = JSONUtil.toJsonStr(executeCodeRequest);
         String responseStr = HttpUtil.createPost(url)

@@ -3,10 +3,8 @@ package com.yyk.oj.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yyk.oj.annotation.AuthCheck;
 import com.yyk.oj.common.BaseResponse;
-import com.yyk.oj.common.DeleteRequest;
 import com.yyk.oj.common.ErrorCode;
 import com.yyk.oj.common.ResultUtils;
-import com.yyk.oj.config.WxOpenConfig;
 import com.yyk.oj.constant.UserConstant;
 import com.yyk.oj.exception.BusinessException;
 import com.yyk.oj.exception.ThrowUtils;
@@ -14,6 +12,7 @@ import com.yyk.oj.model.dto.user.UserAddRequest;
 import com.yyk.oj.model.dto.user.UserLoginRequest;
 import com.yyk.oj.model.dto.user.UserQueryRequest;
 import com.yyk.oj.model.dto.user.UserRegisterRequest;
+import com.yyk.oj.model.dto.user.UserChangePasswordRequest;
 import com.yyk.oj.model.dto.user.UserUpdateMyRequest;
 import com.yyk.oj.model.dto.user.UserUpdateRequest;
 import com.yyk.oj.model.entity.User;
@@ -24,12 +23,8 @@ import com.yyk.oj.service.UserService;
 import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
-import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
-import me.chanjar.weixin.mp.api.WxMpService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.DigestUtils;
@@ -52,9 +47,6 @@ public class UserController {
 
     @Resource
     private UserService userService;
-
-    @Resource
-    private WxOpenConfig wxOpenConfig;
 
     @Resource
     private QuestionService questionService;
@@ -104,29 +96,6 @@ public class UserController {
         }
         LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
         return ResultUtils.success(loginUserVO);
-    }
-
-    /**
-     * 用户登录（微信开放平台）
-     */
-    @GetMapping("/login/wx_open")
-    public BaseResponse<LoginUserVO> userLoginByWxOpen(HttpServletRequest request, HttpServletResponse response,
-                                                       @RequestParam("code") String code) {
-        WxOAuth2AccessToken accessToken;
-        try {
-            WxMpService wxService = wxOpenConfig.getWxMpService();
-            accessToken = wxService.getOAuth2Service().getAccessToken(code);
-            WxOAuth2UserInfo userInfo = wxService.getOAuth2Service().getUserInfo(accessToken, code);
-            String unionId = userInfo.getUnionId();
-            String mpOpenId = userInfo.getOpenid();
-            if (StringUtils.isAnyBlank(unionId, mpOpenId)) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败，系统错误");
-            }
-            return ResultUtils.success(userService.userLoginByMpOpen(userInfo, request));
-        } catch (Exception e) {
-            log.error("userLoginByWxOpen error", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败，系统错误");
-        }
     }
 
     /**
@@ -187,17 +156,17 @@ public class UserController {
     /**
      * 删除用户
      *
-     * @param deleteRequest
+     * @param id
      * @param request
      * @return
      */
-    @PostMapping("/delete")
+    @DeleteMapping("/delete/{id}")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
-        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+    public BaseResponse<Boolean> deleteUser(@PathVariable long id, HttpServletRequest request) {
+        if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean b = userService.removeById(deleteRequest.getId());
+        boolean b = userService.removeById(id);
         return ResultUtils.success(b);
     }
 
@@ -208,7 +177,7 @@ public class UserController {
      * @param request
      * @return
      */
-    @PostMapping("/update")
+    @PutMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest,
                                             HttpServletRequest request) {
@@ -306,7 +275,7 @@ public class UserController {
      * @param request
      * @return
      */
-    @PostMapping("/update/my")
+    @PutMapping("/update/my")
     public BaseResponse<Boolean> updateMyUser(@RequestBody UserUpdateMyRequest userUpdateMyRequest,
                                               HttpServletRequest request) {
         if (userUpdateMyRequest == null) {
@@ -317,6 +286,48 @@ public class UserController {
         BeanUtils.copyProperties(userUpdateMyRequest, user);
         user.setId(loginUser.getId());
         boolean result = userService.updateById(user);
+        ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        return ResultUtils.success(true);
+    }
+
+    /**
+     * 修改密码
+     *
+     * @param changePasswordRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/change/password")
+    public BaseResponse<Boolean> changePassword(@RequestBody UserChangePasswordRequest changePasswordRequest,
+                                                HttpServletRequest request) {
+        if (changePasswordRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String oldPassword = changePasswordRequest.getOldPassword();
+        String newPassword = changePasswordRequest.getNewPassword();
+        String confirmPassword = changePasswordRequest.getConfirmPassword();
+        if (StringUtils.isAnyBlank(oldPassword, newPassword, confirmPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不能为空");
+        }
+        if (newPassword.length() < 8) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "新密码长度不能少于8位");
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的新密码不一致");
+        }
+        User loginUser = userService.getLoginUser(request);
+        // 验证旧密码
+        String encryptOldPassword = DigestUtils.md5DigestAsHex((SALT + oldPassword).getBytes());
+        User dbUser = userService.getById(loginUser.getId());
+        if (!encryptOldPassword.equals(dbUser.getUserPassword())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "当前密码错误");
+        }
+        // 更新密码
+        String encryptNewPassword = DigestUtils.md5DigestAsHex((SALT + newPassword).getBytes());
+        User updateUser = new User();
+        updateUser.setId(loginUser.getId());
+        updateUser.setUserPassword(encryptNewPassword);
+        boolean result = userService.updateById(updateUser);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
     }

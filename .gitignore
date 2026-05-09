@@ -119,7 +119,6 @@ logs/
 
 # 文档目录（内部文档）
 docs/
-
 # 脚本目录（辅助脚本，无需提交）
 scripts/
 
@@ -131,8 +130,18 @@ tmpCode/
 *.bkp
 
 # ==================== 大文件（避免仓库膨胀）====================
-*.docx
 *.doc
+*.docx
 *.pdf
 *.xlsx
 *.xls
+
+# ==================== 论文与测试相关（不公开）====================
+# Word 临时文件
+~$*
+# 论文和测试文本提取
+thesis_content.txt
+test_content.txt
+# 辅助脚本
+check_*.py
+fix_question18.sql

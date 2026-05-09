@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 引入 Spring Boot 默认配置（支持 %clr 颜色转换） -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
+    <!-- 控制台输出：精简格式 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- 时间 | 级别(带颜色) | 线程 | 日志内容 -->
+            <pattern>%d{HH:mm:ss.SSS} %clr(%-5level) [%thread] %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 压制 Spring ExceptionHandlerExceptionResolver 的 WARN（已由我们自己处理） -->
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver"
+            level="ERROR" />
+
+    <!-- 压制 Hikari 连接池启动日志 -->
+    <logger name="com.zaxxer.hikari" level="WARN" />
+
+    <!-- 压制 Spring DispatcherServlet 初始化日志 -->
+    <logger name="org.apache.catalina" level="WARN" />
+    <logger name="org.springframework.web.servlet.DispatcherServlet" level="WARN" />
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>

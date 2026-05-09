@@ -330,7 +330,7 @@ mvn spring-boot:run
 - `POST /api/user/register` - 用户注册
 - `POST /api/user/login` - 用户登录
 - `GET /api/user/get/current` - 获取当前用户信息
-- `POST /api/user/logout` - 用户登出
+- `POST /api/user/logout` - 用户退出
 - `POST /api/user/update` - 更新用户信息
 
 #### 帖子相关接口

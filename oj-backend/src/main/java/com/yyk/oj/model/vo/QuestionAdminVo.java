@@ -27,6 +27,11 @@ public class QuestionAdminVo {
     private String content;
 
     /**
+     * 难度：简单/中等/困难
+     */
+    private String difficulty;
+
+    /**
      * 标签列表（json 数组）
      */
     private String tags;

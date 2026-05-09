@@ -13,11 +13,7 @@ import com.yyk.oj.model.vo.QuestionSubmitVO;
 import com.yyk.oj.service.QuestionSubmitService;
 import com.yyk.oj.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -60,21 +56,23 @@ public class QuestionSubmitController {
     }
 
     /**
-     * 分页获取题目提交列表（除管理员外，普通用户只能看到公开信息，比如语言、题目标签等）
+     * 分页获取题目提交列表（管理员可查看所有，普通用户只能查看自己的提交）
      *
      * @return
      */
     @PostMapping("/list/page")
     public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
                                                                          HttpServletRequest request) {
+        // 获取登录用户
+        final User loginUser = userService.getLoginUser(request);
+        // 非管理员强制只能查询自己的提交记录，防止越权访问
+        if (!userService.isAdmin(loginUser)) {
+            questionSubmitQueryRequest.setUserId(loginUser.getId());
+        }
         long current = questionSubmitQueryRequest.getCurrent();
         long size = questionSubmitQueryRequest.getPageSize();
         Page<QuestionSubmit> questionPage = questionSubmitService.page(new Page<>(current, size),
-                // 获取的是所有的列表
                 questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
-        // 获取用户信息
-        final User loginUser = userService.getLoginUser(request);
-        // 进行过滤，只获取公开信息
         return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionPage, loginUser));
     }
 
@@ -109,14 +107,49 @@ public class QuestionSubmitController {
 
 
     /**
+     * 获取提交统计信息（管理员看全部，普通用户看自己的）
+     */
+    @GetMapping("/stats")
+    public BaseResponse<Map<String, Object>> getSubmitStats(HttpServletRequest request) {
+        final User loginUser = userService.getLoginUser(request);
+        boolean isAdmin = userService.isAdmin(loginUser);
+        Long userId = isAdmin ? null : loginUser.getId();
+
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<QuestionSubmit> totalQuery =
+                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        totalQuery.eq("isDelete", false);
+        if (userId != null) totalQuery.eq("userId", userId);
+        long totalCount = questionSubmitService.count(totalQuery);
+
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<QuestionSubmit> successQuery =
+                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        successQuery.eq("isDelete", false).eq("status", 2);
+        if (userId != null) successQuery.eq("userId", userId);
+        long successCount = questionSubmitService.count(successQuery);
+
+        com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<QuestionSubmit> failQuery =
+                new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>();
+        failQuery.eq("isDelete", false).eq("status", 3);
+        if (userId != null) failQuery.eq("userId", userId);
+        long failCount = questionSubmitService.count(failQuery);
+
+        Map<String, Object> stats = new HashMap<>();
+        stats.put("total", totalCount);
+        stats.put("successCount", successCount);
+        stats.put("failCount", failCount);
+        stats.put("successRate", totalCount > 0 ? Math.round((double) successCount / totalCount * 100) : 0);
+        return ResultUtils.success(stats);
+    }
+
+    /**
      * 删除提交记录（仅管理员可用）
      *
      * @param id 提交记录ID
      * @param request
      * @return 是否删除成功
      */
-    @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteQuestionSubmit(@RequestBody Long id, HttpServletRequest request) {
+    @DeleteMapping("/delete/{id}")
+    public BaseResponse<Boolean> deleteQuestionSubmit(@PathVariable Long id, HttpServletRequest request) {
         if (id == null || id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "提交记录ID无效");
         }

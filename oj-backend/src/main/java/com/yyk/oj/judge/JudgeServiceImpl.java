@@ -18,9 +18,11 @@ import com.yyk.oj.model.enums.JudgeInfoMessageEnum;
 import com.yyk.oj.model.enums.QuestionSubmitStatusEnum;
 import com.yyk.oj.service.QuestionService;
 import com.yyk.oj.service.QuestionSubmitService;
+import com.yyk.oj.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -33,6 +35,12 @@ public class JudgeServiceImpl implements JudgeService {
 
     @Resource
     private QuestionService questionService;
+
+    @Resource
+    private UserService userService;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
 
     @Resource
     private QuestionSubmitService questionSubmitService;
@@ -93,7 +101,8 @@ public class JudgeServiceImpl implements JudgeService {
                 .inputList(inputList)
                 .build();
         ExecuteCodeResponse executeCodeResponse = codeSandbox.executeCode(executeCodeRequest);
-        log.info("沙箱执行结果: {}", executeCodeResponse);
+        log.info("[判题服务] 提交编号={}, 题目编号={}, 沙箱执行状态={}", 
+                questionSubmitId, questionId, executeCodeResponse.getStatus());
         List<String> outputList = executeCodeResponse.getOutputList();
         // 5）根据沙箱的执行结果，设置题目的判题状态和信息
         JudgeContext judgeContext = new JudgeContext();
@@ -171,6 +180,20 @@ public class JudgeServiceImpl implements JudgeService {
             boolean updateQuestion = questionService.update(questionUpdateWrapper);
             if (!updateQuestion) {
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "题目通过数更新失败");
+            }
+            // 更新Redis排行榜ZSet分数
+            Long userId = questionSubmit.getUserId();
+            try {
+                stringRedisTemplate.opsForZSet().incrementScore("ranking:total", String.valueOf(userId), 1);
+                stringRedisTemplate.opsForZSet().incrementScore("ranking:weekly", String.valueOf(userId), 1);
+            } catch (Exception e) {
+                log.warn("[判题服务] 更新排行榜缓存失败", e);
+            }
+            // 清除用户统计缓存
+            try {
+                userService.clearUserStatsCache(userId);
+            } catch (Exception e) {
+                log.warn("[判题服务] 清除用户统计缓存失败", e);
             }
         }
         

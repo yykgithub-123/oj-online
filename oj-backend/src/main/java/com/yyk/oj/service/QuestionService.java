@@ -72,4 +72,11 @@ public interface QuestionService extends IService<Question> {
      */
     Boolean updateQuestionDifficulty(Long questionId, String difficulty);
 
+    /**
+     * 清除题目缓存
+     *
+     * @param questionId 题目ID
+     */
+    void clearQuestionCache(Long questionId);
+
 }

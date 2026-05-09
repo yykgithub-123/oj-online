@@ -22,6 +22,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -99,6 +101,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         String answer = questionQueryRequest.getAnswer();
         Long userId = questionQueryRequest.getUserId();
         String difficulty = questionQueryRequest.getDifficulty();
+        Boolean hasOfficialSolution = questionQueryRequest.getHasOfficialSolution();
         String sortField = questionQueryRequest.getSortField();
         String sortOrder = questionQueryRequest.getSortOrder();
 
@@ -107,6 +110,14 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         queryWrapper.like(StringUtils.isNotBlank(content), "content", content);
         queryWrapper.like(StringUtils.isNotBlank(answer), "answer", answer);
         queryWrapper.eq(StringUtils.isNotBlank(difficulty), "difficulty", difficulty);
+        // 官方题解筛选：有题解 = answer不为空，无题解 = answer为空
+        if (hasOfficialSolution != null) {
+            if (hasOfficialSolution) {
+                queryWrapper.isNotNull("answer").ne("answer", "");
+            } else {
+                queryWrapper.and(wrapper -> wrapper.isNull("answer").or().eq("answer", ""));
+            }
+        }
         if (CollectionUtils.isNotEmpty(tags)) {
             queryWrapper.and(wrapper -> {
                 for (int i = 0; i < tags.size(); i++) {
@@ -138,6 +149,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
      * @return
      */
     @Override
+    @Cacheable(value = "questionVO", key = "#question.id")
     public QuestionVO getQuestionVO(Question question, HttpServletRequest request) {
         QuestionVO questionVO = QuestionVO.objToVo(question);
         // 1. 关联查询用户信息
@@ -240,6 +252,12 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question>
         
         question.setDifficulty(difficulty);
         return this.updateById(question);
+    }
+
+    @Override
+    @CacheEvict(value = "questionVO", key = "#questionId")
+    public void clearQuestionCache(Long questionId) {
+        // 仅用于清除缓存，无需额外操作
     }
 }
 

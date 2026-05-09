@@ -1,94 +1,156 @@
 <template>
-  <div id="userLoginView" class="login-container">
-    <!-- 左侧插图区域 -->
-    <div class="left-section">
-      <div class="background-pattern"></div>
-      <div class="illustration-content">
-        <!-- Logo和品牌名称 -->
+  <div class="login-page">
+    <!-- 左侧视觉区 -->
+    <div class="visual-panel">
+      <div class="visual-bg"></div>
+      <div class="visual-content">
         <div class="brand-section">
-          <img src="@/assets/yake-logo.svg" alt="亚克OJ" class="logo" />
+          <div class="logo-box">
+            <img src="@/assets/yake-logo.svg" alt="亚克OJ" class="logo" />
+          </div>
           <h1 class="brand-name">亚克OJ</h1>
+          <p class="brand-slogan">编程能力，从这里起飞</p>
         </div>
-        
-        <!-- 主要插图 -->
-        <div class="main-illustration">
-          <div class="monitor">
-            <div class="monitor-screen">
-              <div class="code-lines">
-                <div class="code-line">function yyk() {</div>
-                <div class="code-line">  return "Hello World";</div>
-                <div class="code-line">}</div>
-              </div>
+
+        <div class="code-box">
+          <div class="code-header">
+            <div class="code-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
             </div>
+            <span class="file-name">Yyk.java</span>
           </div>
-          
-          <!-- 人物插图 -->
-          <div class="people">
-            <div class="person person-1">
-              <div class="speech-bubble">id=</div>
-            </div>
-            <div class="person person-2">
-              <div class="speech-bubble">&lt;/&gt;</div>
-            </div>
-            <div class="person person-3">
-              <div class="speech-bubble">...</div>
-            </div>
+          <div class="code-content">
+            <pre><code><span class="keyword">public class</span> <span class="class-name">Yyk</span> {
+  <span class="keyword">public int</span>[] <span class="method">twoSum</span>(<span class="keyword">int</span>[] nums, <span class="keyword">int</span> target) {
+    Map&lt;Integer, Integer&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();
+    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; nums.length; i++) {
+      <span class="keyword">int</span> complement = target - nums[i];
+      <span class="keyword">if</span> (map.containsKey(complement)) {
+        <span class="keyword">return new int</span>[]{map.get(complement), i};
+      }
+      map.put(nums[i], i);
+    }
+    <span class="keyword">return new int</span>[]{};
+  }
+}</code></pre>
           </div>
-          
-          <!-- 装饰元素 -->
-          <div class="decorations">
-            <div class="plant"></div>
-            <div class="coffee-cup"></div>
+          <div class="code-footer">
+            <span class="code-author">@Arkyyk</span>
           </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-item">
+            <span class="stat-value">30+</span>
+            <span class="stat-label">算法题目</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-value">30+</span>
+            <span class="stat-label">最多活跃用户</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-value">100+</span>
+            <span class="stat-label">代码提交</span>
+          </div>
+        </div>
+
+        <div class="visual-footer">
+          <a href="http://www.isyyk.top" target="_blank">知识分享 by 程序员亚克</a>
         </div>
       </div>
     </div>
-    
-    <!-- 右侧登录表单区域 -->
-    <div class="right-section">
-      <div class="login-form-container">
-        <h2 class="login-title">用户登录</h2>
+
+    <!-- 右侧表单区 -->
+    <div class="form-panel">
+      <div class="form-inner">
+        <div class="form-header">
+          <h2 class="form-title">欢迎回来</h2>
+          <p class="form-subtitle">登录你的亚克OJ账号</p>
+        </div>
+
         <a-form
           class="login-form"
-          label-align="left"
-          auto-label-width
+          layout="vertical"
           :model="form"
           @submit="handleSubmit"
         >
-          <a-form-item field="userAccount" label="账号">
-            <a-input v-model="form.userAccount" placeholder="请输入账号" />
+          <a-form-item field="userAccount" hide-label>
+            <a-input
+              v-model="form.userAccount"
+              placeholder="请输入账号"
+              size="large"
+            >
+              <template #prefix>
+                <icon-user />
+              </template>
+            </a-input>
           </a-form-item>
-          <a-form-item field="userPassword" tooltip="密码不少于 8 位" label="密码">
+
+          <a-form-item field="userPassword" hide-label>
             <a-input-password
               v-model="form.userPassword"
               placeholder="请输入密码"
-            />
+              size="large"
+            >
+              <template #prefix>
+                <icon-lock />
+              </template>
+            </a-input-password>
           </a-form-item>
-          <a-form-item>
-            <div class="form-actions">
-              <a-button type="primary" html-type="submit" class="login-btn">
-                登录
-              </a-button>
-              <a-link @click="goRegister" class="register-link">新用户注册</a-link>
-            </div>
+
+          <a-form-item hide-label>
+            <a-button
+              type="primary"
+              html-type="submit"
+              long
+              size="large"
+              class="submit-btn"
+            >
+              登录
+            </a-button>
           </a-form-item>
+
+          <div class="form-footer">
+            <span class="footer-text">还没有账号？</span>
+            <a-link @click="goRegister" class="footer-link">立即注册</a-link>
+          </div>
         </a-form>
+
+        <div class="form-divider">
+          <span>或</span>
+        </div>
+
+        <div class="quick-features">
+          <div class="feature-item">
+            <icon-code class="feature-icon" />
+            <span>Java语言在线编程</span>
+          </div>
+          <div class="feature-item">
+            <icon-thunderbolt class="feature-icon" />
+            <span>毫秒级判题反馈</span>
+          </div>
+          <div class="feature-item">
+            <icon-trophy class="feature-icon" />
+            <span>排行榜竞赛系统</span>
+          </div>
+        </div>
       </div>
     </div>
-    
   </div>
 </template>
 
 <script setup lang="ts">
 import { reactive } from "vue";
-import { UserControllerService, UserLoginRequest } from "../../../generated";
-import message from "@arco-design/web-vue/es/message";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { UserControllerService, UserLoginRequest } from "../../../generated";
+import message from "@arco-design/web-vue/es/message";
+import { IconUser, IconLock, IconCode, IconThunderbolt, IconTrophy } from "@arco-design/web-vue/es/icon";
 
-/**
- * 表单信息
- */
 const form = reactive({
   userAccount: "",
   userPassword: "",
@@ -97,357 +159,424 @@ const form = reactive({
 const router = useRouter();
 const store = useStore();
 
-/**
- * 提交表单
- * @param data
- */
 const handleSubmit = async () => {
   const res = await UserControllerService.userLoginUsingPost(form);
-  console.log(res);
-  // 登录成功，跳转到主页
   if (res.code === 0) {
     await store.dispatch("user/getLoginUser");
-    router.push({
-      path: "/",
-      replace: true,
-    });
+    router.push({ path: "/", replace: true });
   } else {
-    message.error("登陆失败，" + res.message);
+    message.error("登录失败，" + res.message);
   }
 };
 
-const goRegister = async () => {
-    router.push("/user/register");
-  }
+const goRegister = () => {
+  router.push("/user/register");
+};
 </script>
 
 <style scoped>
-.login-container {
+.login-page {
+  min-height: 100vh;
   display: flex;
-  height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  position: relative;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  width: 100vw;
-  gap: 0;
+  font-family: var(--font-body);
 }
 
-/* 重置全局样式 */
-#userLoginView {
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  overflow: hidden;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-/* 左侧区域 */
-.left-section {
+/* ========== 左侧视觉面板 ========== */
+.visual-panel {
   flex: 1;
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 20px;
-  margin: 0;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 100vh;
 }
 
-.background-pattern {
+.visual-bg {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: 
-    linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
-  background-size: 20px 20px;
-  opacity: 0.3;
+  inset: 0;
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);
 }
 
-.illustration-content {
+.visual-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+
+.visual-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(59,130,246,0.3) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 20%, rgba(6,182,212,0.2) 0%, transparent 50%);
+}
+
+.visual-content {
   position: relative;
-  z-index: 2;
-  text-align: center;
-  color: white;
-  max-width: 450px;
-  min-height: 500px;
+  z-index: 1;
+  padding: 48px;
+  max-width: 520px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  animation: fadeInUp 0.6s var(--ease-out);
 }
 
 .brand-section {
-  margin-bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.logo-box {
+  width: 56px;
+  height: 56px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 15px;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
 .logo {
-  width: 60px;
-  height: 60px;
+  width: 32px;
+  height: 32px;
   filter: brightness(0) invert(1);
 }
 
 .brand-name {
-  font-size: 2.5rem;
-  font-weight: bold;
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
   margin: 0;
-  color: white;
+  font-family: var(--font-display);
 }
 
-.main-illustration {
-  position: relative;
-  width: 400px;
-  height: 300px;
-  margin: 0 auto;
+.brand-slogan {
+  font-size: 15px;
+  color: rgba(255,255,255,0.7);
+  margin: 0;
+  line-height: 1.5;
 }
 
-.monitor {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 200px;
-  height: 120px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+/* 代码展示框 */
+.code-box {
+  background: rgba(15,23,42,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
 }
 
-.monitor-screen {
-  width: 100%;
-  height: 100%;
-  background: #1e1e1e;
-  border-radius: 6px;
-  padding: 10px;
+.code-header {
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
-.code-lines {
-  color: #fff;
-  font-family: 'Courier New', monospace;
-  font-size: 12px;
-  text-align: left;
+.code-dots {
+  display: flex;
+  gap: 6px;
 }
 
-.code-line {
-  margin: 2px 0;
-  color: #4fc3f7;
-}
-
-.code-line:nth-child(2) {
-  color: #ff6b6b;
-}
-
-.people {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.person {
-  position: absolute;
-  width: 40px;
-  height: 60px;
-  background: #ff6b6b;
-  border-radius: 20px;
-}
-
-.person-1 {
-  top: 20px;
-  left: 50px;
-}
-
-.person-2 {
-  top: 40px;
-  right: 60px;
-}
-
-.person-3 {
-  top: 10px;
-  right: 30px;
-}
-
-.speech-bubble {
-  position: absolute;
-  top: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: white;
-  color: #333;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 10px;
-  white-space: nowrap;
-}
-
-.decorations {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-}
-
-.plant {
-  position: absolute;
-  bottom: 20px;
-  left: 30px;
-  width: 30px;
-  height: 60px;
-  background: #4caf50;
-  border-radius: 15px;
-}
-
-.coffee-cup {
-  position: absolute;
-  bottom: 30px;
-  right: 40px;
-  width: 25px;
-  height: 30px;
-  background: white;
-  border-radius: 0 0 12px 12px;
-}
-
-.coffee-cup::after {
-  content: '';
-  position: absolute;
-  top: -8px;
-  right: -5px;
-  width: 8px;
-  height: 8px;
-  background: #ff9800;
+.dot {
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
 }
 
-/* 右侧区域 */
-.right-section {
-  flex: 1;
+.dot.red { background: #ef4444; }
+.dot.yellow { background: #f59e0b; }
+.dot.green { background: #22c55e; }
+
+.file-name {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  font-family: var(--font-mono);
+}
+
+.code-content {
+  padding: 16px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+.code-content code {
+  color: #e2e8f0;
+}
+
+.keyword { color: #c084fc; }
+.class-name { color: #60a5fa; }
+.method { color: #34d399; }
+.number { color: #fb923c; }
+
+.code-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 6px 16px 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.code-author {
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
+  font-family: var(--font-mono);
+  font-style: italic;
+}
+
+/* 统计数据 */
+.stats-row {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  padding: 20px;
+  gap: 24px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: var(--font-display);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+}
+
+.stat-divider {
+  width: 1px;
+  height: 32px;
+  background: rgba(255,255,255,0.15);
+}
+
+.visual-footer {
+  margin-top: auto;
+}
+
+.visual-footer a {
+  color: rgba(255,255,255,0.4);
+  font-size: 12px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.visual-footer a:hover {
+  color: rgba(255,255,255,0.7);
+}
+
+/* ========== 右侧表单面板 ========== */
+.form-panel {
+  width: 480px;
+  min-width: 480px;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: 48px;
+}
+
+.form-inner {
+  width: 100%;
+  max-width: 360px;
+  animation: fadeIn 0.5s var(--ease-out) 0.2s backwards;
+}
+
+.form-header {
+  margin-bottom: 32px;
+}
+
+.form-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.form-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
   margin: 0;
 }
 
-.login-form-container {
-  background: white;
-  padding: 50px;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 450px;
-  min-height: 480px;
+/* 表单样式 */
+.login-form :deep(.arco-form-item) {
+  margin-bottom: 16px;
 }
 
-.login-title {
-  text-align: center;
-  margin-bottom: 45px;
-  color: #333;
-  font-size: 2rem;
+.login-form :deep(.arco-input-wrapper) {
+  border-radius: 8px;
+  height: 44px;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.login-form :deep(.arco-input-wrapper:hover) {
+  border-color: var(--color-primary-400);
+}
+
+.login-form :deep(.arco-input-wrapper.arco-input-focus) {
+  background: #ffffff;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+}
+
+.login-form :deep(.arco-input-prefix) {
+  color: var(--text-tertiary);
+}
+
+.submit-btn {
+  border-radius: 8px;
+  font-weight: 600;
+  height: 44px;
+  font-size: 15px;
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
+  border: none;
+  box-shadow: 0 4px 14px rgba(59,130,246,0.35);
+  transition: all 0.2s;
+}
+
+.submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(59,130,246,0.45);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(59,130,246,0.3);
+}
+
+.form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.footer-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.footer-link {
+  font-size: 13px;
+  color: var(--color-primary-500);
   font-weight: 600;
 }
 
-.login-form {
-  width: 100%;
-}
-
-.login-form :deep(.arco-form-item) {
-  margin-bottom: 28px;
-}
-
-.login-form :deep(.arco-form-item:last-child) {
-  margin-bottom: 0;
-}
-
-.login-form :deep(.arco-form-item-label) {
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-}
-
-.login-form :deep(.arco-input) {
-  height: 48px;
-  font-size: 16px;
-}
-
-.login-form :deep(.arco-input-password) {
-  height: 48px;
-  font-size: 16px;
-}
-
-
-.form-actions {
+/* 分割线 */
+.form-divider {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  margin-top: 35px;
+  gap: 16px;
+  margin: 28px 0;
 }
 
-.login-btn {
-  width: 110px;
-  height: 44px;
+.form-divider::before,
+.form-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.form-divider span {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+/* 特性列表 */
+.quick-features {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #f8fafc;
   border-radius: 8px;
-  font-weight: 500;
+  border: 1px solid #f1f5f9;
+  transition: all 0.2s;
+}
+
+.feature-item:hover {
+  background: #eff6ff;
+  border-color: #dbeafe;
+}
+
+.feature-icon {
+  color: var(--color-primary-500);
   font-size: 16px;
 }
 
-.register-link {
-  color: #667eea;
+.feature-item span {
+  font-size: 13px;
+  color: var(--text-secondary);
   font-weight: 500;
-  font-size: 15px;
 }
 
-/* 底部版权信息 */
-.footer {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: rgba(255,255,255,0.8);
-  font-size: 14px;
-  text-align: center;
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-  .login-container {
+/* ========== 响应式 ========== */
+@media (max-width: 960px) {
+  .login-page {
     flex-direction: column;
-    height: 100vh;
   }
-  
-  .left-section {
-    flex: none;
-    height: 50vh;
-    padding: 10px;
-    margin: 0;
+
+  .visual-panel {
+    min-height: auto;
+    padding: 40px 24px;
   }
-  
-  .right-section {
-    flex: 1;
-    padding: 10px;
-    margin: 0;
+
+  .visual-content {
+    padding: 0;
+    max-width: 100%;
+    gap: 24px;
   }
-  
-  .main-illustration {
-    width: 300px;
-    height: 200px;
+
+  .code-box {
+    display: none;
   }
-  
-  .brand-name {
-    font-size: 2rem;
+
+  .brand-section {
+    align-items: center;
+    text-align: center;
   }
-  
-  .logo {
-    width: 40px;
-    height: 40px;
+
+  .stats-row {
+    justify-content: center;
+  }
+
+  .form-panel {
+    width: 100%;
+    min-width: 100%;
+    min-height: auto;
+    padding: 32px 24px;
+  }
+
+  .form-inner {
+    max-width: 100%;
   }
 }
 </style>

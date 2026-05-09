@@ -1,6 +1,7 @@
 # ============================================================
-# 配置文件模板 - 复制本文件为 application.yml 并填入真实值
+# 代码沙箱配置文件模板 - 复制本文件为 application.yml 并填入真实值
 # 注意：application.yml 已加入 .gitignore，请勿提交真实配置
+# cp application-example.yml application.yml
 # ============================================================
 
 server:

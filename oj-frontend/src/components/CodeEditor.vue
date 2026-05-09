@@ -83,10 +83,27 @@ watch(
   }
 );
 
+const getEditorPreferences = () => {
+  try {
+    const saved = localStorage.getItem("userPreferences");
+    if (saved) {
+      const prefs = JSON.parse(saved);
+      return {
+        fontSize: prefs.editorFontSize || 14,
+        theme: prefs.editorTheme || "vs-dark",
+      };
+    }
+  } catch (e) {
+    // ignore
+  }
+  return { fontSize: 14, theme: "vs-dark" };
+};
+
 onMounted(() => {
   if (!codeEditorRef.value) {
     return;
   }
+  const editorPrefs = getEditorPreferences();
   // 初始化 Monaco Editor
   codeEditor.value = monaco.editor.create(codeEditorRef.value, {
     value: props.value,
@@ -97,7 +114,8 @@ onMounted(() => {
       enabled: true,
     },
     readOnly: false,
-    theme: "vs-dark",
+    theme: editorPrefs.theme,
+    fontSize: editorPrefs.fontSize,
   });
 
   // 编辑时监听内容变化

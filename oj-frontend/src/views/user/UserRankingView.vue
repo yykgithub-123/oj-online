@@ -381,57 +381,57 @@ onMounted(() => {
 .ranking-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding: var(--space-6);
 }
 
 .ranking-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: var(--space-8);
 }
 
 .ranking-header h1 {
-  font-size: 28px;
+  font-size: var(--text-2xl);
   font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
 }
 
 .ranking-header p {
-  color: #666;
-  font-size: 16px;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
 }
 
 .ranking-tabs {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
   overflow: hidden;
 }
 
 .ranking-content {
-  padding: 24px;
+  padding: var(--space-6);
 }
 
 /* 表格样式优化 */
 .ranking-content :deep(.arco-table) {
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 .ranking-content :deep(.arco-table-th) {
-  background-color: #fafafa;
+  background-color: var(--color-gray-50);
   font-weight: 600;
-  color: #333;
-  border-bottom: 2px solid #e5e5e5;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-default);
 }
 
 .ranking-content :deep(.arco-table-td) {
-  padding: 16px 12px;
+  padding: var(--space-4) var(--space-3);
   vertical-align: middle;
 }
 
 .ranking-content :deep(.arco-table-tbody .arco-table-tr:hover) {
-  background-color: #f8f9ff;
+  background-color: var(--bg-hover);
 }
 
 /* 排名列样式 */
@@ -442,41 +442,41 @@ onMounted(() => {
 
 /* 用户列样式 */
 .ranking-content :deep(.arco-table-td:nth-child(2)) {
-  padding-left: 16px;
+  padding-left: var(--space-4);
 }
 
 /* 统计信息列样式 */
 .ranking-content :deep(.arco-table-td:nth-child(3)) {
   text-align: right;
-  padding-right: 16px;
+  padding-right: var(--space-4);
 }
 
 /* 最近活跃列样式 */
 .ranking-content :deep(.arco-table-td:last-child) {
   text-align: center;
-  color: #666;
-  font-size: 14px;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
 }
 
 .rank-cell {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--space-2);
   width: 60px;
   text-align: center;
 }
 
 .medal {
-  font-size: 18px;
+  font-size: var(--text-lg);
   width: 20px;
   display: inline-block;
 }
 
 .rank-number {
   font-weight: 600;
-  color: #333;
-  font-size: 16px;
+  color: var(--text-primary);
+  font-size: var(--text-base);
   min-width: 20px;
   text-align: center;
 }
@@ -484,20 +484,21 @@ onMounted(() => {
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   min-width: 150px;
 }
 
 .username {
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
   white-space: nowrap;
+  font-size: var(--text-sm);
 }
 
 .stats-cell {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
   align-items: flex-end;
   text-align: right;
   min-width: 120px;
@@ -505,48 +506,48 @@ onMounted(() => {
 
 .stat-item {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   align-items: center;
   justify-content: flex-end;
 }
 
 .stat-label {
-  color: #666;
-  font-size: 14px;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
   white-space: nowrap;
 }
 
 .stat-value {
   font-weight: 500;
-  color: #333;
-  font-size: 16px;
+  color: var(--text-primary);
+  font-size: var(--text-base);
   min-width: 40px;
   text-align: right;
 }
 
 .personal-stats {
-  padding: 24px;
+  padding: var(--space-6);
 }
 
 .stats-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--color-primary-500);
   color: white;
-  padding: 20px;
-  border-radius: 12px;
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .stat-icon {
-  font-size: 32px;
+  font-size: var(--text-2xl);
 }
 
 .stat-info {
@@ -554,57 +555,49 @@ onMounted(() => {
 }
 
 .stat-title {
-  font-size: 14px;
+  font-size: var(--text-sm);
   opacity: 0.9;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .stat-number {
-  font-size: 24px;
+  font-size: var(--text-2xl);
   font-weight: 600;
 }
 
 .difficulty-stats h3 {
-  font-size: 18px;
+  font-size: var(--text-lg);
   font-weight: 600;
-  color: #333;
-  margin-bottom: 16px;
+  color: var(--text-primary);
+  margin-bottom: var(--space-4);
 }
 
 .difficulty-bars {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .difficulty-item {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .difficulty-label {
   width: 60px;
   font-weight: 500;
-  font-size: 14px;
+  font-size: var(--text-sm);
 }
 
-.difficulty-label.easy {
-  color: #52c41a;
-}
-
-.difficulty-label.medium {
-  color: #faad14;
-}
-
-.difficulty-label.hard {
-  color: #f5222d;
-}
+.difficulty-label.easy { color: var(--color-success); }
+.difficulty-label.medium { color: var(--color-warning); }
+.difficulty-label.hard { color: var(--color-error); }
 
 .difficulty-bar {
   flex: 1;
   height: 8px;
-  background: #f0f0f0;
+  background: var(--color-gray-100);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -612,53 +605,45 @@ onMounted(() => {
 .difficulty-progress {
   height: 100%;
   border-radius: 4px;
-  transition: width 0.3s ease;
+  transition: width var(--duration-normal);
 }
 
-.difficulty-progress.easy {
-  background: #52c41a;
-}
-
-.difficulty-progress.medium {
-  background: #faad14;
-}
-
-.difficulty-progress.hard {
-  background: #f5222d;
-}
+.difficulty-progress.easy { background: var(--color-success); }
+.difficulty-progress.medium { background: var(--color-warning); }
+.difficulty-progress.hard { background: var(--color-error); }
 
 .difficulty-count {
   width: 80px;
   text-align: right;
-  font-size: 14px;
-  color: #666;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
 }
 
 .no-stats {
-  padding: 60px 24px;
+  padding: var(--space-12) var(--space-6);
   text-align: center;
 }
 
 /* 响应式设计 */
 @media (max-width: 500px) {
   .ranking-container {
-    padding: 16px;
+    padding: var(--space-4);
   }
-  
+
   .stats-cards {
     grid-template-columns: 1fr;
   }
-  
+
   .difficulty-item {
     flex-direction: column;
     align-items: stretch;
-    gap: 8px;
+    gap: var(--space-2);
   }
-  
+
   .difficulty-label {
     width: auto;
   }
-  
+
   .difficulty-count {
     width: auto;
     text-align: left;

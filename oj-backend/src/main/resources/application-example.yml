@@ -1,6 +1,7 @@
 # ============================================================
 # 配置文件模板 - 复制本文件为 application.yml 并填入真实值
 # 注意：application.yml 已加入 .gitignore，请勿提交真实配置
+# cp application-example.yml application.yml
 # ============================================================
 
 spring:
@@ -31,6 +32,11 @@ spring:
     port: 6379
     timeout: 5000
     password: your_redis_password
+  # 缓存配置
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000  # 默认过期时间1小时（毫秒）
   # 文件上传
   servlet:
     multipart:

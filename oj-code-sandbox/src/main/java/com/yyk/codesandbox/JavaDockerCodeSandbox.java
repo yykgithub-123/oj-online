@@ -5,8 +5,12 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.api.model.*;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
+import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
+import com.github.dockerjava.transport.DockerHttpClient;
 import com.yyk.codesandbox.model.ExecuteCodeRequest;
 import com.yyk.codesandbox.model.ExecuteCodeResponse;
 import com.yyk.codesandbox.model.ExecuteMessage;
@@ -20,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -58,18 +63,33 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate {
     public List<ExecuteMessage> runFile(File userCodeFile, List<String> inputList) {
         String userCodeParentPath = userCodeFile.getParentFile().getAbsolutePath();
 
-        // 获取 Docker Client（Windows 需要指定 TCP 地址）
+        // 获取 Docker Client（Windows 使用 npipe，Linux/Mac 使用 unix socket）
         String dockerHost = System.getProperty("os.name").toLowerCase().contains("win")
-                ? "tcp://localhost:2375"
-                : null;
-        DockerClient dockerClient = dockerHost != null
-                ? DockerClientBuilder.getInstance(dockerHost).build()
-                : DockerClientBuilder.getInstance().build();
+                ? "npipe:////./pipe/docker_engine"
+                : "unix:///var/run/docker.sock";
+        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
+                .withDockerHost(dockerHost)
+                .build();
+        DockerHttpClient httpClient = new ApacheDockerHttpClient.Builder()
+                .dockerHost(config.getDockerHost())
+                .build();
+        DockerClient dockerClient = DockerClientBuilder.getInstance(config)
+                .withDockerHttpClient(httpClient)
+                .build();
 
-        // 拉取镜像
+        // 拉取镜像（仅在本地不存在时拉取）
         String image = "eclipse-temurin:17-jdk-alpine";
         if (FIRST_INIT) {
-            pullImage(dockerClient, image);
+            List<Image> images = dockerClient.listImagesCmd().exec();
+            boolean imageExists = images.stream()
+                    .anyMatch(img -> img.getRepoTags() != null
+                            && Arrays.asList(img.getRepoTags()).contains(image));
+            if (imageExists) {
+                System.out.println("镜像已存在，跳过拉取：" + image);
+            } else {
+                System.out.println("本地无镜像，开始拉取：" + image);
+                pullImage(dockerClient, image);
+            }
         }
 
         System.out.println("镜像准备完成");
@@ -82,9 +102,21 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate {
 
         // 执行代码并收集结果
         List<ExecuteMessage> executeMessageList = new ArrayList<>();
-        for (String inputArgs : inputList) {
-            ExecuteMessage message = executeWithInput(dockerClient, containerId, inputArgs);
-            executeMessageList.add(message);
+        try {
+            for (String inputArgs : inputList) {
+                ExecuteMessage message = executeWithInput(dockerClient, containerId, inputArgs);
+                executeMessageList.add(message);
+            }
+        } finally {
+            // 清理容器：停止并删除，防止容器堆积
+            try {
+                dockerClient.stopContainerCmd(containerId).exec();
+            } catch (Exception ignored) {
+            }
+            try {
+                dockerClient.removeContainerCmd(containerId).withForce(true).exec();
+            } catch (Exception ignored) {
+            }
         }
 
         return executeMessageList;
@@ -119,10 +151,13 @@ public class JavaDockerCodeSandbox extends JavaCodeSandboxTemplate {
         hostConfig.withMemorySwap(0L);
         hostConfig.withCpuCount(1L);
         hostConfig.setBinds(new Bind(userCodeParentPath, new Volume("/app")));
+        // 挂载 tmpfs 到 /tmp，使只读根文件系统下 /tmp 仍可写（用于写入输入文件）
+        hostConfig.withTmpFs(Collections.singletonMap("/tmp", "rw,noexec,nosuid,size=64m"));
 
         CreateContainerResponse response = dockerClient.createContainerCmd(image)
                 .withHostConfig(hostConfig)
                 .withNetworkDisabled(true)
+                .withReadonlyRootfs(true)
                 .withAttachStdin(true)
                 .withAttachStderr(true)
                 .withAttachStdout(true)

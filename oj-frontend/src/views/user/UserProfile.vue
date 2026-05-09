@@ -1,14 +1,34 @@
 <template>
   <div id="userProfile">
     <div class="profile-container">
+      <!-- 页面头部 -->
+      <div class="page-header">
+        <div class="header-content">
+          <div class="title-section">
+            <div class="title-icon-wrapper">
+              <icon-user />
+            </div>
+            <div class="title-text">
+              <h1 class="page-title">个人中心</h1>
+              <p class="page-subtitle">管理您的个人信息和学习进度</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 个人信息卡片 -->
       <div class="profile-card">
         <div class="profile-header">
           <div class="avatar-section">
-            <a-avatar :size="80" class="user-avatar">
-              <img v-if="avatarUrl" :src="avatarUrl" alt="头像" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
-              <span v-else>{{ (userInfo.userName || "无名").charAt(0) }}</span>
-            </a-avatar>
+            <div class="avatar-wrapper">
+              <a-avatar :size="100" class="user-avatar">
+                <img v-if="avatarUrl" :src="avatarUrl" alt="头像" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                <span v-else>{{ (userInfo.userName || "无名").charAt(0) }}</span>
+              </a-avatar>
+              <div class="avatar-edit" @click="$refs.fileInput && $refs.fileInput.click()">
+                <icon-camera />
+              </div>
+            </div>
             <input
               type="file"
               ref="fileInput"
@@ -16,108 +36,92 @@
               style="display: none"
               @change="handleAvatarChange"
             />
-            <a-button type="text" class="change-avatar-btn" @click="$refs.fileInput && $refs.fileInput.click()">更换头像</a-button>
           </div>
           <div class="user-info">
             <h2 class="username">{{ userInfo.userName || "无名" }}</h2>
-            <p class="user-email">{{ userInfo.userEmail || "未设置邮箱" }}</p>
-            <div class="user-stats">
-              <div class="stat-item">
-                <span class="stat-number">{{ userStats.solvedCount || 0 }}</span>
-                <span class="stat-label">已解决</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ userStats.submitCount || 0 }}</span>
-                <span class="stat-label">总提交</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">{{ userStats.acceptRate || 0 }}%</span>
-                <span class="stat-label">通过率</span>
-              </div>
-            </div>
+            <p class="user-account">
+              <icon-user />
+              {{ userInfo.userAccount || "未知账号" }}
+            </p>
+            <p class="user-profile" v-if="userInfo.userProfile">
+              <icon-book />
+              {{ userInfo.userProfile }}
+            </p>
           </div>
         </div>
       </div>
 
-      <!-- 解题统计 -->
-      <div class="stats-section">
-        <div class="section-title">解题统计</div>
-        <div class="stats-grid">
-          <div class="difficulty-card easy">
-            <div class="difficulty-header">
-              <span class="difficulty-name">简单</span>
-              <span class="difficulty-count">{{ userStats.easySolved || 0 }}</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" :style="{ width: getProgressWidth('easy') }"></div>
-            </div>
+      <!-- 提交统计 -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-icon total">
+            <icon-file />
           </div>
-          <div class="difficulty-card medium">
-            <div class="difficulty-header">
-              <span class="difficulty-name">中等</span>
-              <span class="difficulty-count">{{ userStats.mediumSolved || 0 }}</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" :style="{ width: getProgressWidth('medium') }"></div>
-            </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ submitStats.total }}</div>
+            <div class="stat-label">总提交</div>
           </div>
-          <div class="difficulty-card hard">
-            <div class="difficulty-header">
-              <span class="difficulty-name">困难</span>
-              <span class="difficulty-count">{{ userStats.hardSolved || 0 }}</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" :style="{ width: getProgressWidth('hard') }"></div>
-            </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon success">
+            <icon-check-circle />
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ submitStats.successCount }}</div>
+            <div class="stat-label">通过</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon fail">
+            <icon-close-circle />
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ submitStats.failCount }}</div>
+            <div class="stat-label">失败</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon rate">
+            <icon-trophy />
+          </div>
+          <div class="stat-content">
+            <div class="stat-value">{{ submitStats.successRate }}%</div>
+            <div class="stat-label">通过率</div>
           </div>
         </div>
       </div>
 
-      <!-- 最近活动 -->
-      <div class="activity-section">
-        <div class="section-title">最近活动</div>
-        <div class="activity-list">
-          <div 
-            v-for="activity in recentActivities" 
-            :key="activity.id"
-            class="activity-item"
-          >
-            <div class="activity-icon">
-              <a-icon type="check-circle" />
-            </div>
-            <div class="activity-content">
-              <div class="activity-description">{{ activity.description }}</div>
-              <div class="activity-time">{{ formatTime(activity.time) }}</div>
-            </div>
-          </div>
-          <div v-if="recentActivities.length === 0" class="empty-activity">
-            <p>暂无最近活动</p>
-          </div>
+      <!-- 详细信息 -->
+      <div class="info-card">
+        <div class="info-header">
+          <icon-idcard />
+          <h3>账号信息</h3>
         </div>
-      </div>
-
-      <!-- 个人设置 -->
-      <div class="settings-section">
-        <div class="section-title">个人设置</div>
-        <div class="settings-form">
-          <a-form :model="userForm" layout="vertical">
-            <a-form-item label="用户名">
-              <a-input v-model="userForm.userName" placeholder="请输入用户名" />
-            </a-form-item>
-            <a-form-item label="邮箱">
-              <a-input v-model="userForm.userEmail" placeholder="请输入邮箱" />
-            </a-form-item>
-            <a-form-item label="个人简介">
-              <a-textarea 
-                v-model="userForm.userProfile" 
-                placeholder="请输入个人简介"
-                :rows="3"
-              />
-            </a-form-item>
-            <a-form-item>
-              <a-button type="primary" @click="updateProfile">保存修改</a-button>
-            </a-form-item>
-          </a-form>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">用户名</span>
+            <span class="info-value">{{ userInfo.userName || '未设置' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">账号</span>
+            <span class="info-value">{{ userInfo.userAccount || '未知' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">角色</span>
+            <span class="info-value">
+              <a-tag :color="userInfo.userRole === 'admin' ? 'arcoblue' : 'green'" size="small">
+                {{ userInfo.userRole === 'admin' ? '管理员' : '普通用户' }}
+              </a-tag>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">注册时间</span>
+            <span class="info-value">{{ userInfo.createTime || '未知' }}</span>
+          </div>
+          <div class="info-item full-width" v-if="userInfo.userProfile">
+            <span class="info-label">个人简介</span>
+            <span class="info-value">{{ userInfo.userProfile }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -131,74 +135,69 @@ import message from "@arco-design/web-vue/es/message";
 import { uploadFileUsingPost } from "@/api/fileController";
 import { updateAvatar } from "@/api/userController";
 import { UserControllerService } from "../../../generated";
+import {
+  IconUser,
+  IconCamera,
+  IconBook,
+  IconFile,
+  IconCheckCircle,
+  IconCloseCircle,
+  IconTrophy,
+  IconIdcard,
+} from '@arco-design/web-vue/es/icon';
+import { getSubmitStats } from "@/api/questionSubmitController";
 
 const store = useStore();
 
-// 头像URL
 const avatarUrl = ref<string>("");
 const fileInput = ref<HTMLInputElement | null>(null);
 
-// 用户信息
 const userInfo = ref({
   userName: "",
-  userEmail: "",
+  userAccount: "",
   userProfile: "",
+  userRole: "",
+  createTime: "",
 });
 
-// 用户统计
-const userStats = ref({
-  solvedCount: 0,
-  submitCount: 0,
-  acceptRate: 0,
-  easySolved: 0,
-  mediumSolved: 0,
-  hardSolved: 0,
-});
-
-// 最近活动
-const recentActivities = ref([]);
-
-// 表单数据
-const userForm = ref({
-  userName: "",
-  userEmail: "",
-  userProfile: "",
+const submitStats = ref({
+  total: 0,
+  successCount: 0,
+  failCount: 0,
+  successRate: 0,
 });
 
 onMounted(() => {
   loadUserInfo();
-  loadUserStats();
-  loadRecentActivities();
+  loadSubmitStats();
 });
 
-// 加载用户信息
 const loadUserInfo = () => {
   const loginUser = store.state.user.loginUser;
   if (loginUser) {
     userInfo.value = {
       userName: loginUser.userName || "",
-      userEmail: loginUser.userEmail || "",
+      userAccount: loginUser.userAccount || "",
       userProfile: loginUser.userProfile || "",
+      userRole: loginUser.userRole || "user",
+      createTime: loginUser.createTime
+        ? new Date(loginUser.createTime).toLocaleDateString("zh-CN")
+        : "",
     };
-    userForm.value = { ...userInfo.value };
-    // 加载头像
     avatarUrl.value = loginUser.userAvatar || "/yake.webp";
   }
 };
 
-// 处理头像文件选择
 const handleAvatarChange = async (event: Event) => {
   const file = (event.target as HTMLInputElement).files?.[0];
   if (!file) return;
 
-  // 验证文件大小
-  const maxSize = 1 * 1024 * 1024; // 1MB
+  const maxSize = 1 * 1024 * 1024;
   if (file.size > maxSize) {
     message.error("文件大小不能超过 1MB");
     return;
   }
 
-  // 验证文件类型
   const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/svg+xml"];
   if (!allowedTypes.includes(file.type)) {
     message.error("仅支持 jpg/png/webp/svg 格式的图片");
@@ -206,23 +205,16 @@ const handleAvatarChange = async (event: Event) => {
   }
 
   try {
-    // 上传文件
-    const uploadRes = await uploadFileUsingPost(
-      { biz: "user_avatar" },
-      {},
-      file
-    );
+    const uploadRes = await uploadFileUsingPost({ biz: "user_avatar" }, {}, file);
 
     if (uploadRes.data && uploadRes.data.code === 0) {
       const newAvatarUrl = uploadRes.data.data;
 
-      // 更新用户头像
       const updateRes = await updateAvatar(newAvatarUrl);
       if (updateRes.data && updateRes.data.code === 0) {
         avatarUrl.value = newAvatarUrl;
         message.success("头像更新成功");
 
-        // 刷新 store 中的用户信息
         const userRes = await UserControllerService.getLoginUserUsingGet();
         if (userRes.data && userRes.data.code === 0) {
           store.dispatch("user/getLoginUser");
@@ -238,128 +230,120 @@ const handleAvatarChange = async (event: Event) => {
     message.error("上传头像失败，请重试");
   }
 
-  // 清空文件选择，允许重复选择同一文件
   (event.target as HTMLInputElement).value = "";
 };
 
-// 加载用户统计
-const loadUserStats = async () => {
+const loadSubmitStats = async () => {
   try {
-    // 这里应该调用后端API获取用户统计信息
-    // 暂时使用模拟数据
-    userStats.value = {
-      solvedCount: 25,
-      submitCount: 100,
-      acceptRate: 25.0,
-      easySolved: 15,
-      mediumSolved: 8,
-      hardSolved: 2,
-    };
-  } catch (error) {
-    console.error("加载用户统计失败:", error);
-  }
-};
-
-// 加载最近活动
-const loadRecentActivities = async () => {
-  try {
-    // 这里应该调用后端API获取最近活动
-    // 暂时使用模拟数据
-    recentActivities.value = [
-      {
-        id: 1,
-        description: "成功解决了题目：两数之和",
-        time: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2小时前
-      },
-      {
-        id: 2,
-        description: "成功解决了题目：反转链表",
-        time: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5小时前
-      },
-      {
-        id: 3,
-        description: "成功解决了题目：二分查找",
-        time: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1天前
-      },
-    ];
-  } catch (error) {
-    console.error("加载最近活动失败:", error);
-  }
-};
-
-// 获取进度条宽度
-const getProgressWidth = (difficulty: string) => {
-  const total = userStats.value.solvedCount || 1;
-  let solved = 0;
-  
-  switch (difficulty) {
-    case 'easy':
-      solved = userStats.value.easySolved || 0;
-      break;
-    case 'medium':
-      solved = userStats.value.mediumSolved || 0;
-      break;
-    case 'hard':
-      solved = userStats.value.hardSolved || 0;
-      break;
-  }
-  
-  return `${Math.min((solved / total) * 100, 100)}%`;
-};
-
-// 格式化时间
-const formatTime = (time: Date) => {
-  const now = new Date();
-  const diff = now.getTime() - time.getTime();
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(hours / 24);
-  
-  if (days > 0) {
-    return `${days}天前`;
-  } else if (hours > 0) {
-    return `${hours}小时前`;
-  } else {
-    return "刚刚";
-  }
-};
-
-// 更新个人资料
-const updateProfile = async () => {
-  try {
-    // 这里应该调用后端API更新用户信息
-    message.success("个人资料更新成功");
-    userInfo.value = { ...userForm.value };
-  } catch (error) {
-    message.error("更新失败，请稍后重试");
+    const res = await getSubmitStats();
+    if (res.data.code === 0) {
+      submitStats.value = res.data.data;
+    }
+  } catch (e) {
+    console.error("加载提交统计失败", e);
   }
 };
 </script>
 
 <style scoped>
 #userProfile {
-  background-color: #f5f7fa;
+  background-color: var(--bg-page);
   min-height: 100vh;
-  padding: 20px 0;
+  padding: var(--space-6) 0;
+  font-family: var(--font-body);
+  position: relative;
+}
+
+/* 背景纹理 */
+#userProfile::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(at 20% 20%, rgba(139, 92, 246, 0.05) 0px, transparent 50%),
+    radial-gradient(at 80% 40%, rgba(59, 130, 246, 0.04) 0px, transparent 50%),
+    radial-gradient(at 40% 80%, rgba(6, 182, 212, 0.03) 0px, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
 }
 
 .profile-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--space-6);
+  position: relative;
+  z-index: 1;
+}
+
+/* 页面头部 */
+.page-header {
+  margin-bottom: var(--space-6);
+  animation: fadeInUp 0.6s var(--ease-out) backwards;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.title-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.title-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.page-title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.page-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 /* 个人信息卡片 */
 .profile-card {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  margin-bottom: var(--space-5);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
+  animation: fadeInUp 0.6s var(--ease-out) calc(var(--stagger-delay) * 2) backwards;
 }
 
 .profile-header {
   display: flex;
-  gap: 24px;
+  gap: var(--space-6);
   align-items: flex-start;
 }
 
@@ -367,19 +351,41 @@ const updateProfile = async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+}
+
+.avatar-wrapper {
+  position: relative;
 }
 
 .user-avatar {
-  background: linear-gradient(135deg, #4a90e2, #357abd);
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-accent-500) 100%);
   color: white;
-  font-size: 32px;
-  font-weight: bold;
+  font-size: var(--text-3xl);
+  font-weight: 600;
+  border: 3px solid var(--bg-card);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.change-avatar-btn {
-  color: #4a90e2;
-  font-size: 12px;
+.avatar-edit {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 32px;
+  height: 32px;
+  background: var(--color-primary-500);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  border: 2px solid var(--bg-card);
+  transition: all var(--duration-fast);
+}
+
+.avatar-edit:hover {
+  background: var(--color-primary-600);
+  transform: scale(1.1);
 }
 
 .user-info {
@@ -387,213 +393,200 @@ const updateProfile = async () => {
 }
 
 .username {
-  margin: 0 0 8px 0;
-  color: #333;
-  font-size: 24px;
-  font-weight: 600;
+  margin: 0 0 var(--space-2) 0;
+  color: var(--text-primary);
+  font-size: var(--text-2xl);
+  font-weight: 700;
 }
 
-.user-email {
-  margin: 0 0 16px 0;
-  color: #666;
-  font-size: 14px;
-}
-
-.user-stats {
+.user-account,
+.user-profile {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
   display: flex;
-  gap: 32px;
+  align-items: center;
+  gap: var(--space-2);
 }
 
-.stat-item {
+/* 统计卡片 */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--duration-fast);
+  animation: fadeInUp 0.5s var(--ease-out) backwards;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.15s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.25s; }
+.stat-card:nth-child(4) { animation-delay: 0.3s; }
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.stat-icon.total { background: var(--color-info-bg, #e0f2fe); color: var(--color-info, #3b82f6); }
+.stat-icon.success { background: var(--color-success-bg, #dcfce7); color: var(--color-success, #22c55e); }
+.stat-icon.fail { background: var(--color-error-bg, #fee2e2); color: var(--color-error, #ef4444); }
+.stat-icon.rate { background: #fef3c7; color: #d97706; }
+
+.stat-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
 }
 
-.stat-number {
-  font-size: 24px;
-  font-weight: 600;
-  color: #4a90e2;
-  margin-bottom: 4px;
+.stat-value {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
 }
 
 .stat-label {
-  font-size: 12px;
-  color: #666;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
 }
 
-/* 解题统计 */
-.stats-section {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 16px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-}
-
-.difficulty-card {
-  padding: 16px;
-  border-radius: 6px;
-  border: 1px solid;
-}
-
-.difficulty-card.easy {
-  background: #f6ffed;
-  border-color: #b7eb8f;
-}
-
-.difficulty-card.medium {
-  background: #fff7e6;
-  border-color: #ffd591;
-}
-
-.difficulty-card.hard {
-  background: #fff2f0;
-  border-color: #ffb3b3;
-}
-
-.difficulty-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.difficulty-name {
-  font-weight: 500;
-}
-
-.difficulty-card.easy .difficulty-name {
-  color: #52c41a;
-}
-
-.difficulty-card.medium .difficulty-name {
-  color: #fa8c16;
-}
-
-.difficulty-card.hard .difficulty-name {
-  color: #ff4d4f;
-}
-
-.difficulty-count {
-  font-weight: 600;
-  font-size: 18px;
-}
-
-.progress-bar {
-  height: 4px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 2px;
+/* 账号信息卡片 */
+.info-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
+  animation: fadeInUp 0.6s var(--ease-out) 0.35s backwards;
 }
 
-.progress-fill {
-  height: 100%;
-  transition: width 0.3s ease;
-}
-
-.difficulty-card.easy .progress-fill {
-  background: #52c41a;
-}
-
-.difficulty-card.medium .progress-fill {
-  background: #fa8c16;
-}
-
-.difficulty-card.hard .progress-fill {
-  background: #ff4d4f;
-}
-
-/* 最近活动 */
-.activity-section {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.activity-list {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.activity-item {
+.info-header {
   display: flex;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-subtle, #f8fafc);
+  border-bottom: 1px solid var(--border-default);
+  font-size: 18px;
+  color: var(--color-primary-500, #3b82f6);
 }
 
-.activity-item:last-child {
+.info-header h3 {
+  margin: 0;
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  padding: 0;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-default);
+  border-right: 1px solid var(--border-default);
+}
+
+.info-item:nth-child(2n) {
+  border-right: none;
+}
+
+.info-item.full-width {
+  grid-column: 1 / -1;
+  border-right: none;
+}
+
+.info-item:last-child {
   border-bottom: none;
 }
 
-.activity-icon {
-  color: #52c41a;
-  font-size: 16px;
-  margin-top: 2px;
+.info-label {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary, #94a3b8);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.activity-content {
-  flex: 1;
-}
-
-.activity-description {
-  color: #333;
-  font-size: 14px;
-  margin-bottom: 4px;
-}
-
-.activity-time {
-  color: #999;
-  font-size: 12px;
-}
-
-.empty-activity {
-  text-align: center;
-  padding: 40px 0;
-  color: #999;
-}
-
-/* 个人设置 */
-.settings-section {
-  background: white;
-  border-radius: 8px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.settings-form {
-  max-width: 500px;
+.info-value {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 /* 响应式设计 */
-@media (max-width: 500px) {
+@media (max-width: 900px) {
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  #userProfile {
+    padding: var(--space-4) 0;
+  }
+
+  .profile-container {
+    padding: 0 var(--space-4);
+  }
+
   .profile-header {
     flex-direction: column;
     text-align: center;
   }
-  
-  .user-stats {
-    justify-content: center;
+
+  .header-content {
+    padding: var(--space-4);
   }
-  
-  .stats-grid {
+
+  .title-section {
+    flex-direction: column;
+  }
+
+  .profile-card {
+    padding: var(--space-5);
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .info-grid {
     grid-template-columns: 1fr;
+  }
+
+  .info-item {
+    border-right: none;
   }
 }
 </style>
